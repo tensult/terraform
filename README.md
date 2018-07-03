@@ -23,7 +23,7 @@ Three tier is industry standard for modern web application where we have 3 tiers
 
 Creating three architecture in AWS requires lot of resources like VPC, Subnets, Gateways, Routing tables etc to be created and this has been automated using terraform, for details go [here](https://github.com/tensult/terraform/blob/master/aws/three-tier/README.md).
 
-### [RDS MySQL Cross region & Cross account replication using DMS]((https://github.com/tensult/terraform/blob/master/aws/mysql_dms))
+### [RDS MySQL Cross region & Cross account replication using DMS]((https://github.com/tensult/terraform/blob/master/aws/mysql_dms)
 
 Cross region replication helps to quickly recover from AWS region wide failures. Also it will help to serve the customer faster as we can use replica for read traffic and few of them might be closer to replica’s region.
 
