@@ -1,7 +1,21 @@
 # terraform
 Terraform automation scripts
 ## AWS
-### Three tier
+
+Before starting with Terraform you should have configured your credentials in the AWS folder in your system as shown below.
+
+```
+[default]
+aws_access_key_id = 
+aws_secret_access_key = 
+[prod]
+aws_access_key_id =
+aws_secret_access_key =
+```
+
+The name for the accounts can be anything you want but make sure that in the "main.tf" file that your are using the appropriate name for the profile when configuring.
+
+### [Three tier](https://github.com/tensult/terraform/blob/master/aws/three-tier)
 Three tier is industry standard for modern web application where we have 3 tiers for following
 * Presentation tier (WebAPP tier): Prepares HTMLs by calling App tier
 * Application tier (App tier): Prepare data by calling DB or other third party services
@@ -9,7 +23,7 @@ Three tier is industry standard for modern web application where we have 3 tiers
 
 Creating three architecture in AWS requires lot of resources like VPC, Subnets, Gateways, Routing tables etc to be created and this has been automated using terraform, for details go [here](https://github.com/tensult/terraform/blob/master/aws/three-tier/README.md).
 
-### MySQL Cross account, cross region DMS
+### [RDS MySQL Cross region & Cross account replication using DMS]((https://github.com/tensult/terraform/blob/master/aws/mysql_dms))
 
 Cross region replication helps to quickly recover from AWS region wide failures. Also it will help to serve the customer faster as we can use replica for read traffic and few of them might be closer to replica’s region.
 

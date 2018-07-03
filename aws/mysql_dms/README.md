@@ -1,4 +1,4 @@
-### MySQL Cross region, Cross account DMS
+### RDS MySQL Cross region & Cross account replication using DMS
  This project is used to automate the setting up of a DMS task for cross account cross region Data Migraion services. Before running the "main.tf" file please make sure to go through the "variables.tf" file so that all the required variables have been correctly defned. After doing so you can run the "main.tf" file with the following commands. First initialise Terraform with the following command:
 ```
 terraform init
