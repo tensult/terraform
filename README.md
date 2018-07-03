@@ -1,5 +1,5 @@
 # terraform
-[WIP]Terraform automation scripts
+Terraform automation scripts
 ## AWS
 ### Three tier
 Three tier is industry standard for modern web application where we have 3 tiers for following

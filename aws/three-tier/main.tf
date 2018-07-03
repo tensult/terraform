@@ -254,6 +254,7 @@ resource "aws_lb_listener" "webserver-lb" {
   load_balancer_arn = "${aws_lb.weblb.arn}"
   port              = "${var.listener_port}"
   protocol          = "${var.listener_protocol}"
+ # certificate_arn  = "${var.certificate_arn_user}"
   default_action {
     target_group_arn = "${aws_lb_target_group.alb_group.arn}"
     type             = "forward"
