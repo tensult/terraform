@@ -23,85 +23,84 @@ variable "db_subnets_cidr_blocks" {
   default     = ["172.20.3.0/24", "172.20.5.0/24"]
 }
 
-
 variable "db_subnet_name" {
   description = "Name of the RDS subnet group"
-  default = "mysql_db_group"
+  default     = "mysql_db_group"
 }
 
 variable "db_storage" {
   description = "RDS storage space"
-  default = "10"
+  default     = "10"
 }
 
 variable "db_engine" {
   description = "RDS engine type"
-  default = "mysql"
+  default     = "mysql"
 }
 
 variable "db_instance_class" {
   description = "RDS instance class"
-  default = "db.t2.micro"
+  default     = "db.t2.micro"
 }
 
 variable "db_name" {
   description = "Name of the RDS"
-  default = "mysqldb"
+  default     = "mysqldb"
 }
 
 variable "db_username" {
   description = "Username of the RDS"
-  default = "mysql_terraform"
+  default     = "mysql_terraform"
 }
 
 variable "db_password" {
   description = "Password of the RDS"
-  default = "terraformdb"
+  default     = "terraformdb"
 }
 
 variable "dms_subnet_desc" {
   description = "Description of DMS subnet group"
-  default = "Testing DMS by terraform"
+  default     = "Testing DMS by terraform"
 }
 
 variable "dms_subnet_id" {
   description = "ID of DMS subnet group"
-  default = "dms-subnet-group-terraform"
+  default     = "dms-subnet-group-terraform"
 }
 
 variable "dms_subnet_name" {
   description = "Name of DMS subnet group"
-  default = "dms-subnet-terraform"
+  default     = "dms-subnet-terraform"
 }
 
 variable "dms_instance_storage" {
   description = "Storage of the DMS instance"
-  default = "20"
+  default     = "20"
 }
 
 variable "dms_instance_class" {
   description = "Class of the DMS instance"
-  default = "dms.t2.micro"
+  default     = "dms.t2.micro"
 }
 
 variable "dms_instance_id" {
   description = "ID of the DMS instance"
-  default = "dms-mysql-terraform"
+  default     = "dms-mysql-terraform"
 }
 
 variable "dms_instance_name" {
   description = "Name of the DMS instance"
-  default = "dms-mysql-terraform"
+  default     = "dms-mysql-terraform"
 }
 
 variable "dms_target_endpoint_id" {
   description = "DMS target endpoint ID"
-  default = "dms-endpoint-target-mysql"
+  default     = "dms-endpoint-target-mysql"
 }
 
 variable "dms_source_endpoint_id" {
   description = "DMS source endpoint ID"
-  default = "dms-endpoint-source-mysql"
+  default     = "dms-endpoint-source-mysql"
 }
 
 # Enter the source DB details here
@@ -112,7 +111,7 @@ variable "source_db_identifier" {
 
 variable "sourcedb_password" {
   description = "Password of the source"
-  default = "mysqlterraform"
+  default     = "mysqlterraform"
 }
 
 variable "peering_owner_id" {
@@ -151,4 +150,3 @@ variable "dms_migration_type" {
   description = "Type of migration. Can be one of full-load | cdc | full-load-and-cdc"
   default     = "full-load"
 }
-

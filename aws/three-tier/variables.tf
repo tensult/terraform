@@ -35,52 +35,52 @@ variable "db_subnets_cidr_blocks" {
 
 variable "rds_subnet_name" {
   description = "Name of the RDS subnet group"
-  default = "rds_group"
+  default     = "rds_group"
 }
 
 variable "rds_storage" {
   description = "RDS storage space"
-  default = "10"
+  default     = "10"
 }
 
 variable "rds_engine" {
   description = "RDS engine type"
-  default = "mysql"
+  default     = "mysql"
 }
 
 variable "rds_instance_class" {
   description = "RDS instance class"
-  default = "db.t2.micro"
+  default     = "db.t2.micro"
 }
 
 variable "rds_name" {
   description = "Name of the RDS"
-  default = "mysql_rds"
+  default     = "mysql_rds"
 }
 
 variable "rds_username" {
   description = "Username of the RDS"
-  default = "mysql_terraform"
+  default     = "mysql_terraform"
 }
 
 variable "rds_password" {
   description = "Password of the RDS"
-  default = "terraformrds"
+  default     = "terraformrds"
 }
 
 variable "websg_name" {
   description = "Name of security group for webservers"
-  default = "webserver_sg"
+  default     = "webserver_sg"
 }
 
 variable "web_ami" {
   description = "AMI of webservers"
-  default = "ami-e0ba5c83"
+  default     = "ami-e0ba5c83"
 }
 
 variable "web_instance" {
   description = "Instance type of webservers"
-  default = "t2.micro"
+  default     = "t2.micro"
 }
 
 variable "webserver_name" {
@@ -123,4 +123,3 @@ variable "certificate_arn_user" {
   description = "Enter the certificate ARN for HTTPS"
   default     = "#########"
 }
-
