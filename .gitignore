@@ -7,3 +7,4 @@
 
 # .tfvars files
 *.tfvars
+*.log
