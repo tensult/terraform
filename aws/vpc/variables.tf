@@ -32,4 +32,8 @@ variable "sub_private_1b" {
 variable "customer_gw" {
   description = "Define customer Gateway"
   default = "1.2.3.4"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 6efa0a183b8696eec82946331dfcf39299d8e50f
