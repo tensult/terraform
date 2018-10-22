@@ -27,3 +27,9 @@ variable "sub_private_1b" {
   description = "CIDR for the private subnet"
   default = "10.13.1.0/24"
 }
+
+#Customet Gateway
+variable "customer_gw" {
+  description = "Define customer Gateway"
+  default = "1.2.3.4"
+}
