@@ -1,7 +1,7 @@
 #Create Customer Gateway
 resource "aws_customer_gateway" "cgw" {
   bgp_asn    = 65000
-  ip_address = "1.2.3.4" #Public IP of the router
+  ip_address = "${var.customer_gw}"
   type       = "ipsec.1"
 
   tags {
