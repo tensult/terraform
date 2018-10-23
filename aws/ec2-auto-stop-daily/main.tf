@@ -4,7 +4,7 @@ provider "aws" {
   region  = "${var.region}"
 }
 resource "aws_iam_role" "lambda_role" {
-  name = "EC2-Stop-Start-Lambda-Role"
+  name = "EC2-Auto-Stop-Lambda"
 
   assume_role_policy = <<EOF
 {
@@ -24,7 +24,7 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name = "EC2-Stop-Start"
+  name = "EC2-Auto-Stop"
 
   policy = <<EOF
 {
@@ -62,7 +62,7 @@ data "archive_file" "lambda_code" {
 
 resource "aws_lambda_function" "lambda_function" {
   filename         = "${data.archive_file.lambda_code.output_path}"
-  function_name    = "EC2-Stop-Start"
+  function_name    = "EC2-Auto-Stop"
   role             = "${aws_iam_role.lambda_role.arn}"
   handler          = "index.handler"
   source_code_hash = "${base64sha256(file("${data.archive_file.lambda_code.output_path}"))}"
