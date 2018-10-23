@@ -1,10 +1,5 @@
-
-provider "aws" {
-  profile = "${var.profile}"
-  region  = "${var.region}"
-}
 resource "aws_iam_role" "lambda_role" {
-  name = "EC2-Auto-Stop-Lambda"
+  name = "Security-Group-Rules-Checker"
 
   assume_role_policy = <<EOF
 {
@@ -24,7 +19,7 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name = "EC2-Auto-Stop"
+  name = "Config-Rule-Lambda"
 
   policy = <<EOF
 {
@@ -33,9 +28,8 @@ resource "aws_iam_policy" "lambda_policy" {
        {
            "Effect": "Allow",
            "Action": [
-               "ec2:DescribeInstances",
-               "ec2:DescribeRegions",
-               "ec2:StopInstances"
+               "config:GetResourceConfigHistory",
+               "config:PutEvaluations"
            ],
            "Resource": "*"
        }
@@ -62,7 +56,7 @@ data "archive_file" "lambda_code" {
 
 resource "aws_lambda_function" "lambda_function" {
   filename         = "${data.archive_file.lambda_code.output_path}"
-  function_name    = "EC2-Auto-Stop"
+  function_name    = "Config-Rule-SecurityGroups-Checker"
   role             = "${aws_iam_role.lambda_role.arn}"
   handler          = "lambda.handler"
   source_code_hash = "${base64sha256(file("${data.archive_file.lambda_code.output_path}"))}"
@@ -70,14 +64,9 @@ resource "aws_lambda_function" "lambda_function" {
   timeout          = "300"
 }
 
-resource "aws_cloudwatch_event_rule" "daily_stop" {
-  name        = "Daily-EC2-Stop-instances"
-  description = "Stops the instances"
-  schedule_expression = "cron(0 16 * * ? *)"
-}
-
-resource "aws_cloudwatch_event_target" "lambda_trigger" {
-  rule      = "${aws_cloudwatch_event_rule.daily_stop.name}"
-  target_id = "TriggerLambda"
-  arn       = "${aws_lambda_function.lambda_function.arn}"
+resource "aws_lambda_permission" "allow_config" {
+  statement_id   = "AllowExecutionFromConfig"
+  action         = "lambda:InvokeFunction"
+  function_name  = "${aws_lambda_function.lambda_function.function_name}"
+  principal      = "config.amazonaws.com"
 }
