@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name = "Security-Group-Rules-Checker"
+  name = "Config-Rule-Lambda"
 
   assume_role_policy = <<EOF
 {
@@ -48,25 +48,48 @@ resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
     policy_arn = "${aws_iam_policy.lambda_policy.arn}"
 }
 
-data "archive_file" "lambda_code" {
+data "archive_file" "security_groups" {
   type        = "zip"
-  source_file = "lambda.js"
-  output_path = "lambda.zip"
+  source_file = "security_groups.js"
+  output_path = "sg-lambda.zip"
 }
 
-resource "aws_lambda_function" "lambda_function" {
-  filename         = "${data.archive_file.lambda_code.output_path}"
+resource "aws_lambda_function" "security_groups" {
+  filename         = "${data.archive_file.security_groups.output_path}"
   function_name    = "Config-Rule-SecurityGroups-Checker"
   role             = "${aws_iam_role.lambda_role.arn}"
-  handler          = "lambda.handler"
-  source_code_hash = "${base64sha256(file("${data.archive_file.lambda_code.output_path}"))}"
+  handler          = "security_groups.handler"
+  source_code_hash = "${base64sha256(file("${data.archive_file.security_groups.output_path}"))}"
   runtime          = "nodejs8.10"
   timeout          = "300"
 }
 
-resource "aws_lambda_permission" "allow_config" {
+resource "aws_lambda_permission" "security_groups" {
   statement_id   = "AllowExecutionFromConfig"
   action         = "lambda:InvokeFunction"
-  function_name  = "${aws_lambda_function.lambda_function.function_name}"
+  function_name  = "${aws_lambda_function.security_groups.function_name}"
+  principal      = "config.amazonaws.com"
+}
+
+data "archive_file" "instance_tags" {
+  type        = "zip"
+  source_file = "instance_tags.js"
+  output_path = "instnace-tags-lambda.zip"
+}
+
+resource "aws_lambda_function" "instance_tags" {
+  filename         = "${data.archive_file.instance_tags.output_path}"
+  function_name    = "Config-Rule-Instance-Tags-Checker"
+  role             = "${aws_iam_role.lambda_role.arn}"
+  handler          = "instance_tags.handler"
+  source_code_hash = "${base64sha256(file("${data.archive_file.instance_tags.output_path}"))}"
+  runtime          = "nodejs8.10"
+  timeout          = "300"
+}
+
+resource "aws_lambda_permission" "instance_tags" {
+  statement_id   = "AllowExecutionFromConfig"
+  action         = "lambda:InvokeFunction"
+  function_name  = "${aws_lambda_function.instance_tags.function_name}"
   principal      = "config.amazonaws.com"
 }

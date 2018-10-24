@@ -1,9 +1,10 @@
 resource "aws_config_config_rule" "security_groups" {
-  name = "Security-Groups-Rules"
-
+  name = "Security-Groups-Rule"
+  description = "Checks for open ports"
+  
   source {
     owner             = "CUSTOM_LAMBDA"
-    source_identifier = "${aws_lambda_function.lambda_function.arn}",
+    source_identifier = "${aws_lambda_function.security_groups.arn}",
     source_detail {
       message_type = "ConfigurationItemChangeNotification"
     }
@@ -11,6 +12,24 @@ resource "aws_config_config_rule" "security_groups" {
 
   scope {
     compliance_resource_types = ["AWS::EC2::SecurityGroup"]
+  }
+
+  depends_on = ["aws_config_configuration_recorder.config_recorder"]
+}
+
+resource "aws_config_config_rule" "instance_tags" {
+  name = "Instance-Tags-Rule"
+  description = "Checks if Instance has mandatory tags"
+  source {
+    owner             = "CUSTOM_LAMBDA"
+    source_identifier = "${aws_lambda_function.instance_tags.arn}",
+    source_detail {
+      message_type = "ConfigurationItemChangeNotification"
+    }
+  }
+
+  scope {
+    compliance_resource_types = ["AWS::EC2::Instance"]
   }
 
   depends_on = ["aws_config_configuration_recorder.config_recorder"]
