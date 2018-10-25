@@ -4,21 +4,21 @@ const AWS = require('aws-sdk');
 
 const config = new AWS.ConfigService();
 
-const defaultTags = [
-    "HostName",
-    "OS Type",
-    "Application",
-    "Project Name",
-    "Project Code",
-    "Change No",
-    "Primary owner",
-    "Secondary owner",
-    "Provision Type",
-    "Provision Date",
-    "Expiry Date",
-    "Server Role",
-    "Business Unit"
-]
+const defaultTags = {
+    'HostName': 'string',
+    'OS Type': 'string',
+    'Application': 'string',
+    'Project Name': 'string',
+    'Project Code': 'string',
+    'Change No': 'string',
+    'Primary owner': 'email',
+    'Secondary owner': 'email',
+    'Provision Type': 'string',
+    'Provision Date': 'date',
+    'Expiry Date': 'date',
+    'Server Role': 'string',
+    'Business Unit': 'string'
+}
 
 // Helper function used to validate input
 function checkDefined(reference, referenceName) {
@@ -94,7 +94,10 @@ function isApplicable(configurationItem, event) {
 
 
 function checkTags(tags) {
-    return defaultTags.every((tag) => tags[tag]);
+    return Object.keys(defaultTags).every((tagName) => {
+        //TODO: add value validation
+        return tags[tagName];
+    });
 }
 
 // In this example, the resource is compliant if it is an instance and its type matches the type specified as the desired type.
@@ -105,7 +108,7 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 
     if (configurationItem.resourceType !== 'AWS::EC2::Instance') {
         return 'NOT_APPLICABLE';
-    } else if (checkTags(configurationItem.configuration.tags)) {
+    } else if (checkTags(configurationItem.tags)) {
         return 'COMPLIANT';
     }
     return 'NON_COMPLIANT';
@@ -113,6 +116,7 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 
 // Receives the event and context from AWS Lambda.
 exports.handler = (event, context, callback) => {
+    console.log(JSON.stringify(event, null, 2));
     checkDefined(event, 'event');
     const invokingEvent = JSON.parse(event.invokingEvent);
     getConfigurationItem(invokingEvent, (err, configurationItem) => {
