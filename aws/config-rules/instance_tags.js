@@ -116,7 +116,6 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 
 // Receives the event and context from AWS Lambda.
 exports.handler = (event, context, callback) => {
-    console.log(JSON.stringify(event, null, 2));
     checkDefined(event, 'event');
     const invokingEvent = JSON.parse(event.invokingEvent);
     getConfigurationItem(invokingEvent, (err, configurationItem) => {
