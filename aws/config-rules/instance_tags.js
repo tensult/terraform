@@ -3,6 +3,9 @@
 const AWS = require('aws-sdk');
 
 const config = new AWS.ConfigService();
+const ses = new AWS.SES({
+    region: "eu-west-1"
+});
 
 const defaultTags = {
     'HostName': 'string',
@@ -20,6 +23,10 @@ const defaultTags = {
     'Business Unit': 'string'
 }
 
+//regular expression
+const emailRegExp = new RegExp(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+
+
 // Helper function used to validate input
 function checkDefined(reference, referenceName) {
     if (!reference) {
@@ -35,20 +42,30 @@ function isOverSizedChangeNotification(messageType) {
 }
 
 // Get the configurationItem for the resource using the getResourceConfigHistory API.
-function getConfiguration(resourceType, resourceId, configurationCaptureTime, callback) {
-    config.getResourceConfigHistory({
+function getConfiguration(resourceType, resourceId, configurationCaptureTime) {
+    return config.getResourceConfigHistory({
         resourceType,
         resourceId,
         laterTime: new Date(configurationCaptureTime),
         limit: 1
-    }, (err, data) => {
-        if (err) {
-            callback(err, null);
-        }
-        const configurationItem = data.configurationItems[0];
-        callback(null, configurationItem);
-    });
+    }).promise().then((data) => {
+        return data.configurationItems[0];
+    })
 }
+
+function putEvaluations(configurationItem, compliance, resultToken) {
+    // Initializes the request that contains the evaluation results.
+    const putEvaluationsRequest = {};
+    putEvaluationsRequest.Evaluations = [{
+        ComplianceResourceType: configurationItem.resourceType,
+        ComplianceResourceId: configurationItem.resourceId,
+        ComplianceType: compliance,
+        OrderingTimestamp: configurationItem.configurationItemCaptureTime,
+    },];
+    putEvaluationsRequest.ResultToken = resultToken;
+    return config.putEvaluations(putEvaluationsRequest).promise();
+}
+
 
 // Convert the oversized configuration item from the API model to the original invocation model.
 function convertApiConfiguration(apiConfiguration) {
@@ -66,20 +83,20 @@ function convertApiConfiguration(apiConfiguration) {
 }
 
 // Based on the message type, get the configuration item either from the configurationItem object in the invoking event or with the getResourceConfigHistory API in the getConfiguration function.
-function getConfigurationItem(invokingEvent, callback) {
-    checkDefined(invokingEvent, 'invokingEvent');
-    if (isOverSizedChangeNotification(invokingEvent.messageType)) {
-        const configurationItemSummary = checkDefined(invokingEvent.configurationItemSummary, 'configurationItemSummary');
-        getConfiguration(configurationItemSummary.resourceType, configurationItemSummary.resourceId, configurationItemSummary.configurationItemCaptureTime, (err, apiConfigurationItem) => {
-            if (err) {
-                callback(err);
-            }
+async function getConfigurationItem(invokingEvent) {
+    try {
+        checkDefined(invokingEvent, 'invokingEvent');
+        if (isOverSizedChangeNotification(invokingEvent.messageType)) {
+            const configurationItemSummary = checkDefined(invokingEvent.configurationItemSummary, 'configurationItemSummary');
+            const apiConfigurationItem = await getConfiguration(configurationItemSummary.resourceType, configurationItemSummary.resourceId, configurationItemSummary.configurationItemCaptureTime);
             const configurationItem = convertApiConfiguration(apiConfigurationItem);
-            callback(null, configurationItem);
-        });
-    } else {
-        checkDefined(invokingEvent.configurationItem, 'configurationItem');
-        callback(null, invokingEvent.configurationItem);
+            return configurationItem;
+        } else {
+            checkDefined(invokingEvent.configurationItem, 'configurationItem');
+            return invokingEvent.configurationItem;
+        }
+    } catch (err) {
+        throw err;
     }
 }
 
@@ -95,7 +112,12 @@ function isApplicable(configurationItem, event) {
 
 function checkTags(tags) {
     return Object.keys(defaultTags).every((tagName) => {
-        //TODO: add value validation
+        if (tags[tagName] && defaultTags[tagName] === "email") {
+            return emailRegExp.test(tags[tagName])
+        }
+        if (tags[tagName] && defaultTags[tagName] === "date") {
+            return !isNaN(new Date(tags[tagName]))
+        }
         return tags[tagName];
     });
 }
@@ -114,39 +136,76 @@ function evaluateChangeNotificationCompliance(configurationItem) {
     return 'NON_COMPLIANT';
 }
 
-// Receives the event and context from AWS Lambda.
-exports.handler = (event, context, callback) => {
-    checkDefined(event, 'event');
-    const invokingEvent = JSON.parse(event.invokingEvent);
-    getConfigurationItem(invokingEvent, (err, configurationItem) => {
-        if (err) {
-            callback(err);
+function sendNotificationToUsers(body, emails) {
+    let params = {
+        Destination: { /* required */
+            CcAddresses: [`${process.env.adminEmail}`],
+        },
+        Message: { /* required */
+            Body: { /* required */
+                Html: {
+                    Data: `Ec2 instaces which are missing tags : ${ JSON.stringify(body)}`, /* required */
+                    Charset: 'utf-8'
+                }
+            },
+            Subject: { /* required */
+                Data: "Add tags",
+                Charset: 'utf-8'
+            }
+        },
+        Source: `${process.env.sesEmail}`, /* required */
+    }
+    params.Destination.ToAddresses = emails.length ? emails : [`${process.env.adminEmail}`];
+
+    return ses.sendEmail(params).promise();
+}
+
+function prepareEmailBody(configurationItem) {
+    const body = {
+        "accountId": configurationItem.accountId,
+        "accountName": `${process.env.accountName}`,
+        "resourceType": configurationItem.resourceType,
+        "resourceId": configurationItem.resourceId,
+        "resourceName": configurationItem.resourceName,
+        "tags": configurationItem.tags
+    }
+    return body;
+}
+
+function fetchEmails(configurationItem) {
+    let emails = []
+    if (configurationItem.tags) {
+        if (configurationItem.tags["Primary owner"]) {
+            emails.push(configurationItem.tags["Primary owner"]);
         }
+        if (configurationItem.tags["Secondary owner"]) {
+            emails.push(configurationItem.tags["Secondary owner"]);
+        }
+    }
+    return emails;
+}
+
+
+// Receives the event and context from AWS Lambda.
+exports.handler = async (event) => {
+    try {
+        checkDefined(event, 'event');
+        const invokingEvent = JSON.parse(event.invokingEvent);
+        const configurationItem = await getConfigurationItem(invokingEvent);
         let compliance = 'NOT_APPLICABLE';
-        const putEvaluationsRequest = {};
         if (isApplicable(configurationItem, event)) {
             // Invoke the compliance checking function.
             compliance = evaluateChangeNotificationCompliance(configurationItem);
         }
-        // Initializes the request that contains the evaluation results.
-        putEvaluationsRequest.Evaluations = [{
-            ComplianceResourceType: configurationItem.resourceType,
-            ComplianceResourceId: configurationItem.resourceId,
-            ComplianceType: compliance,
-            OrderingTimestamp: configurationItem.configurationItemCaptureTime,
-        }, ];
-        putEvaluationsRequest.ResultToken = event.resultToken;
-
         // Sends the evaluation results to AWS Config.
-        config.putEvaluations(putEvaluationsRequest, (error, data) => {
-            if (error) {
-                callback(error, null);
-            } else if (data.FailedEvaluations.length > 0) {
-                // Ends the function if evaluation results are not successfully reported to AWS Config.
-                callback(JSON.stringify(data), null);
-            } else {
-                callback(null, data);
-            }
-        });
-    });
-};
+        const putEvaluationsResponse = await putEvaluations(configurationItem, compliance, event.resultToken);
+        console.log(putEvaluationsResponse);
+        if (compliance === "NON_COMPLIANT") {
+            const emailBody = prepareEmailBody(configurationItem);
+            const emails = fetchEmails(configurationItem);
+            await sendNotificationToUsers(emailBody, emails);
+        }
+    } catch (err) {
+        throw err;
+    }
+}

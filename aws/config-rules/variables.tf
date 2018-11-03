@@ -10,3 +10,7 @@ variable "region" {
 variable "config_bucket_name" {
   description = "AWS Config S3 Bucket name"
 }
+
+variable "account_name" {
+  description = "AWS Account Name"
+}

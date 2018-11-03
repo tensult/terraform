@@ -29,7 +29,8 @@ resource "aws_iam_policy" "lambda_policy" {
            "Effect": "Allow",
            "Action": [
                "config:GetResourceConfigHistory",
-               "config:PutEvaluations"
+               "config:PutEvaluations",
+               "ses:SendEmail"
            ],
            "Resource": "*"
        }
@@ -62,6 +63,14 @@ resource "aws_lambda_function" "security_groups" {
   source_code_hash = "${base64sha256(file("${data.archive_file.security_groups.output_path}"))}"
   runtime          = "nodejs8.10"
   timeout          = "300"
+
+  environment {
+    variables = {
+      adminEmail = "CIO-CloudManagement@mphasis.com"
+      sesEmail = "CIO-CloudManagement@mphasis.com"
+      accountName = "${var.account_name}"
+    }
+  }
 }
 
 resource "aws_lambda_permission" "security_groups" {
@@ -85,6 +94,14 @@ resource "aws_lambda_function" "instance_tags" {
   source_code_hash = "${base64sha256(file("${data.archive_file.instance_tags.output_path}"))}"
   runtime          = "nodejs8.10"
   timeout          = "300"
+
+  environment {
+    variables = {
+      adminEmail = "CIO-CloudManagement@mphasis.com"
+      sesEmail = "CIO-CloudManagement@mphasis.com"
+      accountName = "${var.account_name}"
+    }
+  }
 }
 
 resource "aws_lambda_permission" "instance_tags" {

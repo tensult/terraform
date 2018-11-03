@@ -35,7 +35,9 @@ resource "aws_iam_policy" "lambda_policy" {
            "Action": [
                "ec2:DescribeInstances",
                "ec2:DescribeRegions",
-               "ec2:StopInstances"
+               "ec2:StopInstances",
+               "ses:SendEmail"
+
            ],
            "Resource": "*"
        }
@@ -67,7 +69,16 @@ resource "aws_lambda_function" "lambda_function" {
   handler          = "lambda.handler"
   source_code_hash = "${base64sha256(file("${data.archive_file.lambda_code.output_path}"))}"
   runtime          = "nodejs8.10"
-  timeout          = "300"
+  timeout          = "900"
+
+  environment {
+    variables = {
+      adminEmail = "CIO-CloudManagement@mphasis.com"
+      sesEmail = "CIO-CloudManagement@mphasis.com"
+      tensultEmail = "agnel@tensult.com"
+      accountName = "${var.account_name}"
+    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "daily_check_ec2" {
