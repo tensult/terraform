@@ -7,6 +7,10 @@ variable "region" {
   default     = "ap-south-1"
 }
 
+variable "vpc_id" {
+  description = "VPC ID"
+}
+
 variable "domain_name" {
   description = "Domain name"
 }
