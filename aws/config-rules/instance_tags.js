@@ -8,6 +8,7 @@ const ses = new AWS.SES({
 });
 
 const defaultTags = {
+    'Name': 'string',
     'HostName': 'string',
     'OS Type': 'string',
     'Application': 'string',

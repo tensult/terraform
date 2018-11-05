@@ -127,3 +127,35 @@ resource "aws_ssm_document" "redhat" {
 }
 DOC
 }
+
+resource "aws_ssm_document" "Ubuntu" {
+  name          = "Ubuntu_Domain_Join"
+  document_type = "Command"
+  
+  content = <<DOC
+  {
+   "schemaVersion":"2.0",
+   "description":"Run a Shell script to securely domain-join a Ubuntu instance",
+   "mainSteps":[
+      {
+         "action":"aws:runShellScript",
+         "name":"runShellScript",
+         "inputs":{
+            "runCommand":[
+               "sudo apt update -y\n",
+               "sudo apt upgrade -y\n",
+               "sudo apt install awscli -y\n",
+               "sudo apt-get -y install sssd realmd krb5-user samba-common packagekit adcli\n",
+               "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "echo $password | sudo realm join --user=$username $domain\n",
+               "sudo reboot"
+            ]
+         }
+      }
+   ]
+}
+DOC
+}

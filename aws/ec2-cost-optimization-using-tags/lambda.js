@@ -51,7 +51,7 @@ function filterStoppableEc2InstanceIds(ec2Reservations) {
     })
 }
 
-function collectIdsOfEc2InstanceInstancesToBeExpired(ec2Reservations) {
+function collectEc2InstancesToBeExpired(ec2Reservations) {
     return ec2Reservations.map((reservation) => {
         return reservation.Instances;
     }).reduce((allInstances, instancesInReservation) => {
@@ -66,9 +66,7 @@ function collectIdsOfEc2InstanceInstancesToBeExpired(ec2Reservations) {
             }
             return false;
         });
-    }).map((instance) => {
-        return instance.InstanceId;
-    })
+    });
 }
 
 function stopRunningEc2Instances(instanceIds) {
@@ -110,13 +108,12 @@ exports.handler = async (event) => {
             return;
         }
 
-        let collectedRunningEc2InstanceIds = collectIdsOfEc2InstanceInstancesToBeExpired(ec2Instances.Reservations);
-        console.log(collectedRunningEc2InstanceIds);
-        if (collectedRunningEc2InstanceIds && collectedRunningEc2InstanceIds.length) {
-            const alertMailBody = `Ec2 instanceIds of instaces are going to expire in a week. 
+        let expiringInstances = collectEc2InstancesToBeExpired(ec2Instances.Reservations);
+        if (expiringInstances && expiringInstances.length) {
+            const alertMailBody = `Ec2 instanceIds of instances are going to expire in a week. 
                                    Account Name : ${process.env.accountName}
                                    Id's : ${ JSON.stringify(collectedRunningEc2InstanceIds)}`;
-            const alertMailSubject = "Ec2 instaces expire in a week";
+            const alertMailSubject = "Ec2 instances are expiring";
             await sendNotificationToUsers(alertMailBody, alertMailSubject);
         }
 
