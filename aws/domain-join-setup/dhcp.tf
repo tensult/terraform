@@ -1,5 +1,5 @@
 resource "aws_vpc_dhcp_options" "ad" {
-  domain_name          = "mphasis.com"
+  domain_name          = "${var.domain_name}"
   domain_name_servers  = ["${var.domain_dns_ip}", "AmazonProvidedDNS"]
 
   tags {

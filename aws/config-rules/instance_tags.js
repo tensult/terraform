@@ -136,15 +136,15 @@ function evaluateChangeNotificationCompliance(configurationItem) {
     return 'NON_COMPLIANT';
 }
 
-function sendNotificationToUsers(body, emails) {
+function sendNotificationToUsers(body, emails) {    
     let params = {
         Destination: { /* required */
-            CcAddresses: [`${process.env.adminEmail}`],
+            ToAddresses: [`${process.env.sesEmail}`],
         },
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: `Ec2 instaces which are missing tags : ${ JSON.stringify(body)}`, /* required */
+                    Data: `Ec2 instances which are missing tags : ${ JSON.stringify(body)}`, /* required */
                     Charset: 'utf-8'
                 }
             },
@@ -155,7 +155,9 @@ function sendNotificationToUsers(body, emails) {
         },
         Source: `${process.env.sesEmail}`, /* required */
     }
-    params.Destination.ToAddresses = emails.length ? emails : [`${process.env.adminEmail}`];
+    if(emails && emails.length) {
+        params.Destination.CcAddresses = emails;
+    }
 
     return ses.sendEmail(params).promise();
 }

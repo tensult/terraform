@@ -138,7 +138,8 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 function sendNotificationToUsers(body) {
     let params = {
         Destination: { /* required */
-            ToAddresses: [`${process.env.adminEmail}`]
+            ToAddresses: [`${process.env.sesEmail}`],
+            CcAddresses: process.env.notificationEmails.split(/[, ]+/)
         },
         Message: { /* required */
             Body: { /* required */

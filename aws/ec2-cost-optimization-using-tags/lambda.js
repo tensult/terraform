@@ -80,7 +80,8 @@ function stopRunningEc2Instances(instanceIds) {
 function sendNotificationToUsers(emailBody, emailSubject) {
     let params = {
         Destination: { /* required */
-            ToAddresses: [`${process.env.adminEmail}`, `${process.env.tensultEmail}`]
+            ToAddresses: [`${process.env.sesEmail}`],
+            CcAddresses: process.env.notificationEmails.split(/[, ]+/)
         },
         Message: { /* required */
             Body: { /* required */

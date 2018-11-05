@@ -73,9 +73,8 @@ resource "aws_lambda_function" "lambda_function" {
 
   environment {
     variables = {
-      adminEmail = "CIO-CloudManagement@mphasis.com"
-      sesEmail = "CIO-CloudManagement@mphasis.com"
-      tensultEmail = "agnel@tensult.com"
+      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
+      sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
     }
   }

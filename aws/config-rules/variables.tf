@@ -14,3 +14,13 @@ variable "config_bucket_name" {
 variable "account_name" {
   description = "AWS Account Name"
 }
+
+variable "ses_email" {
+  description = "SES verified email"
+}
+
+variable "notification_emails" {
+  description = "Email to be notified"
+  type = "string"
+  default = ""
+}

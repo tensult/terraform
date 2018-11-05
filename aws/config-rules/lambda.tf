@@ -66,8 +66,8 @@ resource "aws_lambda_function" "security_groups" {
 
   environment {
     variables = {
-      adminEmail = "CIO-CloudManagement@mphasis.com"
-      sesEmail = "CIO-CloudManagement@mphasis.com"
+      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
+      sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
     }
   }
@@ -97,8 +97,7 @@ resource "aws_lambda_function" "instance_tags" {
 
   environment {
     variables = {
-      adminEmail = "CIO-CloudManagement@mphasis.com"
-      sesEmail = "CIO-CloudManagement@mphasis.com"
+      sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
     }
   }
