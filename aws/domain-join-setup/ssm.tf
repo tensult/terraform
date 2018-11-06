@@ -121,9 +121,6 @@ resource "aws_ssm_document" "redhat" {
          "name":"runShellScript",
          "inputs":{
             "runCommand":[
-               "sudo yum update -y\n",
-               "sudo yum install awscli -y\n",
-               "sudo yum install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python -y\n",
                "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
@@ -153,9 +150,6 @@ resource "aws_ssm_document" "Ubuntu" {
          "name":"runShellScript",
          "inputs":{
             "runCommand":[
-               "sudo apt update -y\n",
-               "sudo apt upgrade -y\n",
-               "sudo apt install awscli -y\n",
                "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
