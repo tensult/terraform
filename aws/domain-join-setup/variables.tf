@@ -15,6 +15,10 @@ variable "domain_name" {
   description = "Domain name"
 }
 
+variable "domain_ou_path" {
+  description = "Domain OU path"
+}
+
 variable "domain_dns_ip" {
   description = "Domain DNS IP"
 }

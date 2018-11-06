@@ -35,6 +35,14 @@ resource "aws_ssm_parameter" "domain_name" {
   overwrite = true
 }
 
+resource "aws_ssm_parameter" "domain_ou_path" {
+  name  = "/domain/ou_path"
+  description  = "Domain OU path"
+  type  = "String"
+  value = "${var.domain_ou_path}"
+  overwrite = true
+}
+
 
 resource "aws_ssm_document" "windows_2012" {
   name          = "Windows_2012_Domain_Join"
@@ -52,11 +60,12 @@ resource "aws_ssm_document" "windows_2012" {
             "runCommand":[
                "$ipdns = (Get-SSMParameterValue -Name /domain/dns_ip).Parameters[0].Value\n",
                "$domain = (Get-SSMParameterValue -Name /domain/name).Parameters[0].Value\n",
+               "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
                "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
                "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
                "$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n",
                "Set-DnsClientServerAddress \"Ethernet 2\" -ServerAddresses $ipdns\n",
-               "Add-Computer -DomainName $domain -Credential $credential\n",
+               "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
                "Restart-Computer -force"
             ]
          }
@@ -82,11 +91,12 @@ resource "aws_ssm_document" "windows_2016" {
             "runCommand":[
                "$ipdns = (Get-SSMParameterValue -Name /domain/dns_ip).Parameters[0].Value\n",
                "$domain = (Get-SSMParameterValue -Name /domain/name).Parameters[0].Value\n",
+               "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
                "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
                "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
                "$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n",
                "Set-DnsClientServerAddress \"Ethernet\" -ServerAddresses $ipdns\n",
-               "Add-Computer -DomainName $domain -Credential $credential\n",
+               "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
                "Restart-Computer -force"
             ]
          }
@@ -116,9 +126,10 @@ resource "aws_ssm_document" "redhat" {
                "sudo yum install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python -y\n",
                "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join --user=$username $domain\n",
+               "echo $password | sudo realm join -U $username --computer-ou=$ouPath $domain\n",
                "sudo reboot"
             ]
          }
@@ -145,12 +156,12 @@ resource "aws_ssm_document" "Ubuntu" {
                "sudo apt update -y\n",
                "sudo apt upgrade -y\n",
                "sudo apt install awscli -y\n",
-               "sudo apt-get -y install sssd realmd krb5-user samba-common packagekit adcli\n",
                "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join --user=$username $domain\n",
+               "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain\n",
                "sudo reboot"
             ]
          }
