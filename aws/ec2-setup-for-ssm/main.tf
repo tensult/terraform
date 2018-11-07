@@ -64,6 +64,28 @@ resource "aws_iam_policy" "ssm_params" {
 EOF
 }
 
+resource "aws_iam_policy" "mem_monitor" {
+  name = "EC2-Memory-Disk-Monitoring"
+
+  policy = <<EOF
+{
+   "Version": "2012-10-17",
+   "Statement": [
+       {
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:ListMetrics",
+                "cloudwatch:PutMetricData",
+                "cloudwatch:GetMetricStatistics",
+                "ec2:DescribeTags"
+            ],
+            "Resource": "*"
+       }
+   ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "ssm-policy" {
     role       = "${aws_iam_role.role.name}"
     policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
@@ -72,4 +94,9 @@ resource "aws_iam_role_policy_attachment" "ssm-policy" {
 resource "aws_iam_role_policy_attachment" "ssm-params-policy" {
     role       = "${aws_iam_role.role.name}"
     policy_arn = "${aws_iam_policy.ssm_params.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "mem-monitor-policy" {
+    role       = "${aws_iam_role.role.name}"
+    policy_arn = "${aws_iam_policy.mem_monitor.arn}"
 }
