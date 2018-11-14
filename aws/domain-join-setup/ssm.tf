@@ -62,8 +62,9 @@ resource "aws_ssm_document" "windows_2012" {
                "$domain = (Get-SSMParameterValue -Name /domain/name).Parameters[0].Value\n",
                "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
                "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
+               "$domain_username = \"$domain\\$username\"\n",
                "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
-               "$credential = New-Object System.Management.Automation.PSCredential('$username','$password')\n",
+               "$credential = New-Object System.Management.Automation.PSCredential($domain_username,$password)\n",
                "Set-DnsClientServerAddress \"Ethernet 2\" -ServerAddresses ($ipdns)\n",
                "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
                "Restart-Computer -Force"
@@ -93,8 +94,10 @@ resource "aws_ssm_document" "windows_2016" {
                "$domain = (Get-SSMParameterValue -Name /domain/name).Parameters[0].Value\n",
                "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
                "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
+               "$domain_username = \"$domain\\$username\"\n",
+               "echo $domain_username\n",
                "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
-               "$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n",
+               "$credential = New-Object System.Management.Automation.PSCredential($domain_username,$password)\n",
                "Set-DnsClientServerAddress \"Ethernet\" -ServerAddresses $ipdns\n",
                "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
                "Restart-Computer -Force"
@@ -206,10 +209,37 @@ resource "aws_ssm_document" "Hostname_Linux" {
          "inputs":{
             "runCommand":[
                "sudo su -",
-               "insid=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
-               "tagval=$(aws ec2 describe-instances --instance-id $insid --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
-               "echo $tagval > /etc/hostname\n",
+               "instanceid=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+               "hostname=$(aws ec2 describe-instances --instance-id $instanceid --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+               "echo $hostname > /etc/hostname\n",
                "reboot"
+            ]
+         }
+      }
+   ]
+}
+DOC
+}
+
+resource "aws_ssm_document" "Hostname_Windows" {
+  name          = "Hostname_Change_Windows"
+  document_type = "Command"
+  
+  content = <<DOC
+  {
+   "schemaVersion":"2.0",
+   "description":"Run a Shell script to securely Changing the Hostname for Windows instance",
+   "mainSteps":[
+      {
+         "action":"aws:runShellScript",
+         "name":"runShellScript",
+         "inputs":{
+            "runCommand":[
+              "$computername = hostname\n",
+              "$instanceId = (Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id).Content\n",
+              "$hostname = aws ec2 describe-instances --instance-id $instId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text\n",
+              "Rename-computer –computername \"$computername\" –newname \"$hostname\"\n",
+              "Restart-Computer -Force"
             ]
          }
       }
