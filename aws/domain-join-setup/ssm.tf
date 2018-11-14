@@ -23,7 +23,7 @@ resource "aws_ssm_parameter" "ipdns" {
   name  = "/domain/dns_ip"
   description  = "DNS IP Address"
   type  = "String"
-  value = "${var.domain_dns_ip}"
+  value = "${join(",", var.domain_dns_ips)}"
   overwrite = true
 }
 
@@ -63,10 +63,10 @@ resource "aws_ssm_document" "windows_2012" {
                "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
                "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
                "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
-               "$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n",
-               "Set-DnsClientServerAddress \"Ethernet 2\" -ServerAddresses $ipdns\n",
+               "$credential = New-Object System.Management.Automation.PSCredential('$username','$password')\n",
+               "Set-DnsClientServerAddress \"Ethernet 2\" -ServerAddresses ($ipdns)\n",
                "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
-               "Restart-Computer -force"
+               "Restart-Computer -Force"
             ]
          }
       }
@@ -97,7 +97,7 @@ resource "aws_ssm_document" "windows_2016" {
                "$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n",
                "Set-DnsClientServerAddress \"Ethernet\" -ServerAddresses $ipdns\n",
                "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
-               "Restart-Computer -force"
+               "Restart-Computer -Force"
             ]
          }
       }
@@ -121,12 +121,39 @@ resource "aws_ssm_document" "redhat" {
          "name":"runShellScript",
          "inputs":{
             "runCommand":[
-               "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join -U $username --computer-ou=$ouPath $domain\n",
+               "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
+               "sudo reboot"
+            ]
+         }
+      }
+   ]
+}
+DOC
+}
+
+resource "aws_ssm_document" "centos" {
+  name          = "CentOS_Domain_Join"
+  document_type = "Command"
+  
+  content = <<DOC
+  {
+   "schemaVersion":"2.0",
+   "description":"Run a Shell script to securely domain-join a CentOS instance",
+   "mainSteps":[
+      {
+         "action":"aws:runShellScript",
+         "name":"runShellScript",
+         "inputs":{
+            "runCommand":[
+               "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+               "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
                "sudo reboot"
             ]
          }
@@ -150,13 +177,39 @@ resource "aws_ssm_document" "Ubuntu" {
          "name":"runShellScript",
          "inputs":{
             "runCommand":[
-               "ipdns=$(aws ssm get-parameters --names /domain/dns_ip --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain\n",
+               "echo $password | sudo realm join -U $username --computer-ou=$ouPath $domain\n",
                "sudo reboot"
+            ]
+         }
+      }
+   ]
+}
+DOC
+}
+
+resource "aws_ssm_document" "Hostname_Linux" {
+  name          = "Hostname_Change_Linux"
+  document_type = "Command"
+  
+  content = <<DOC
+  {
+   "schemaVersion":"2.0",
+   "description":"Run a Shell script to securely Changing the Hostname for Linux instance",
+   "mainSteps":[
+      {
+         "action":"aws:runShellScript",
+         "name":"runShellScript",
+         "inputs":{
+            "runCommand":[
+               "sudo su -",
+               "insid=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+               "tagval=$(aws ec2 describe-instances --instance-id $insid --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+               "echo $tagval > /etc/hostname\n",
+               "reboot"
             ]
          }
       }

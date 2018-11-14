@@ -1,6 +1,6 @@
 resource "aws_vpc_dhcp_options" "ad" {
   domain_name          = "${var.domain_name}"
-  domain_name_servers  = ["${var.domain_dns_ip}", "AmazonProvidedDNS"]
+  domain_name_servers  = "${concat(var.domain_dns_ips, var.amazon_dns)}"
 
   tags {
     Name = "ActiveDirectory"

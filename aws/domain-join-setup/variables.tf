@@ -19,9 +19,17 @@ variable "domain_ou_path" {
   description = "Domain OU path"
 }
 
-variable "domain_dns_ip" {
-  description = "Domain DNS IP"
+variable "domain_dns_ips" {
+  description = "Domain DNS IPs"
+  type = "list"
 }
+
+variable "amazon_dns" {
+  description = "Amazon Provided DNS"
+  default = ["AmazonProvidedDNS"],
+  type = "list"
+}
+
 
 variable "domain_username" {
   description = "Domain username"
