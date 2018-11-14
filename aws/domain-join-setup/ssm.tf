@@ -138,33 +138,6 @@ resource "aws_ssm_document" "redhat" {
 DOC
 }
 
-resource "aws_ssm_document" "centos" {
-  name          = "CentOS_Domain_Join"
-  document_type = "Command"
-  
-  content = <<DOC
-  {
-   "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely domain-join a CentOS instance",
-   "mainSteps":[
-      {
-         "action":"aws:runShellScript",
-         "name":"runShellScript",
-         "inputs":{
-            "runCommand":[
-               "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
-               "sudo reboot"
-            ]
-         }
-      }
-   ]
-}
-DOC
-}
 
 resource "aws_ssm_document" "Ubuntu" {
   name          = "Ubuntu_Domain_Join"
@@ -231,14 +204,14 @@ resource "aws_ssm_document" "Hostname_Windows" {
    "description":"Run a Shell script to securely Changing the Hostname for Windows instance",
    "mainSteps":[
       {
-         "action":"aws:runShellScript",
-         "name":"runShellScript",
+         "action":"aws:runPowerShellScript",
+         "name":"runPowerShellScript",
          "inputs":{
             "runCommand":[
-              "$computername = hostname\n",
-              "$instanceId = (Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id).Content\n",
-              "$hostname = aws ec2 describe-instances --instance-id $instId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text\n",
-              "Rename-computer –computername \"$computername\" –newname \"$hostname\"\n",
+              "$currenthostname = hostname\n",
+              "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
+              "$newhostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+              "Rename-computer –computername \"$currenthostname\" –newname \"$newhostname\"\n",
               "Restart-Computer -Force"
             ]
          }
