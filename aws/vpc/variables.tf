@@ -1,36 +1,34 @@
 #Define Region
-variable "aws_region" {
-    description = "Region for the VPC"
-    default = "ap-south-1"
+variable "profile" {
+  description = "AWS Profile"
+  default     = "default"
+}
+variable "region" {
+  description = "AWS region"
+  default     = "ap-south-1"
 }
 
 variable "vpc_cidr" {
-  description = "CIDR for the Shared Service VPC"
-  default = "10.13.0.0/20"
+  description = "CIDR for the VPC"
 }
 
 variable "sub_public_1a" {
   description = "CIDR for the public subnet"
-  default = "10.13.2.0/24"
 }
 
 variable "sub_public_1b" {
   description = "CIDR for the public subnet"
-  default = "10.13.3.0/24"
 }
 
 variable "sub_private_1a" {
   description = "CIDR for the private subnet"
-  default = "10.13.0.0/24"
 }
 
 variable "sub_private_1b" {
   description = "CIDR for the private subnet"
-  default = "10.13.1.0/24"
 }
 
 #Customet Gateway
 variable "customer_gw" {
   description = "Define customer Gateway"
-  default = "1.2.3.4"
 }

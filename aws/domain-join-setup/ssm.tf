@@ -109,14 +109,14 @@ resource "aws_ssm_document" "windows_2016" {
 DOC
 }
   
-resource "aws_ssm_document" "redhat" {
-  name          = "RedHat_Domain_Join"
+resource "aws_ssm_document" "redhatlinux" {
+  name          = "RedHat_CentOS_Domain_Join"
   document_type = "Command"
   
   content = <<DOC
   {
    "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely domain-join a RedHat flavor instance",
+   "description":"Run a Shell script to securely domain-join a RedHat and CentOS instance",
    "mainSteps":[
       {
          "action":"aws:runShellScript",
@@ -138,13 +138,13 @@ DOC
 }
 
 resource "aws_ssm_document" "linux" {
-  name          = "Ubuntu_AmazonLinux_Domain_Join"
+  name          = "Ubuntu_Amzlinux_Domain_Join"
   document_type = "Command"
   
   content = <<DOC
   {
    "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely domain-join a Ubuntu and Amazon Linux instance",
+   "description":"Run a Shell script to securely domain-join a Ubuntu and Amazon Linux instances",
    "mainSteps":[
       {
          "action":"aws:runShellScript",
