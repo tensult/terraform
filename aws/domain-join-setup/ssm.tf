@@ -108,7 +108,6 @@ resource "aws_ssm_document" "windows_2016" {
 }
 DOC
 }
-
   
 resource "aws_ssm_document" "redhat" {
   name          = "RedHat_Domain_Join"
@@ -129,7 +128,7 @@ resource "aws_ssm_document" "redhat" {
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
-               "sudo reboot"
+               "sudo shutdown -r 1"
             ]
          }
       }
@@ -138,15 +137,14 @@ resource "aws_ssm_document" "redhat" {
 DOC
 }
 
-
-resource "aws_ssm_document" "Ubuntu" {
-  name          = "Ubuntu_Domain_Join"
+resource "aws_ssm_document" "linux" {
+  name          = "Ubuntu_AmazonLinux_Domain_Join"
   document_type = "Command"
   
   content = <<DOC
   {
    "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely domain-join a Ubuntu instance",
+   "description":"Run a Shell script to securely domain-join a Ubuntu and Amazon Linux instance",
    "mainSteps":[
       {
          "action":"aws:runShellScript",
@@ -157,8 +155,35 @@ resource "aws_ssm_document" "Ubuntu" {
                "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "echo $password | sudo realm join -U $username --computer-ou=$ouPath $domain\n",
-               "sudo reboot"
+               "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain\n",
+               "sudo shutdown -r 1"
+            ]
+         }
+      }
+   ]
+}
+DOC
+}
+
+resource "aws_ssm_document" "Hostname_Windows" {
+  name          = "Hostname_Change_Windows"
+  document_type = "Command"
+  
+  content = <<DOC
+  {
+   "schemaVersion":"2.0",
+   "description":"Run a Shell script to securely Changing the Hostname for Windows instance",
+   "mainSteps":[
+      {
+         "action":"aws:runPowerShellScript",
+         "name":"runPowerShellScript",
+         "inputs":{
+            "runCommand":[
+              "$currenthostname = hostname\n",
+              "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
+              "$newhostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+              "Rename-computer –computername \"$currenthostname\" –newname \"$newhostname\"\n",
+              "Restart-Computer -Force"
             ]
          }
       }
@@ -194,29 +219,3 @@ resource "aws_ssm_document" "Hostname_Linux" {
 DOC
 }
 
-resource "aws_ssm_document" "Hostname_Windows" {
-  name          = "Hostname_Change_Windows"
-  document_type = "Command"
-  
-  content = <<DOC
-  {
-   "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely Changing the Hostname for Windows instance",
-   "mainSteps":[
-      {
-         "action":"aws:runPowerShellScript",
-         "name":"runPowerShellScript",
-         "inputs":{
-            "runCommand":[
-              "$currenthostname = hostname\n",
-              "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
-              "$newhostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
-              "Rename-computer –computername \"$currenthostname\" –newname \"$newhostname\"\n",
-              "Restart-Computer -Force"
-            ]
-         }
-      }
-   ]
-}
-DOC
-}
