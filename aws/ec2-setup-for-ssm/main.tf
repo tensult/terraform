@@ -1,8 +1,3 @@
-provider "aws" {
-  profile = "${var.profile}"
-  region  = "${var.region}"
-}
-
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "EC2-Managed-Instance-Profile"
   role = "${aws_iam_role.role.name}"
@@ -38,31 +33,6 @@ resource "aws_kms_alias" "ssm_key_alias" {
   target_key_id = "${aws_kms_key.ssm.key_id}"
 }
 
-resource "aws_iam_policy" "ssm_params" {
-  name = "EC2-Managed-Instance-SSM-Params"
-
-  policy = <<EOF
-{
-   "Version": "2012-10-17",
-   "Statement": [
-       {
-           "Effect": "Allow",
-           "Action": [
-               "kms:Decrypt"
-           ],
-           "Resource": "${aws_kms_key.ssm.arn}"
-       },
-       {
-           "Effect": "Allow",
-           "Action": [
-               "ssm:GetParameter"
-           ],
-           "Resource": "arn:aws:ssm:*:*:parameter/domain/*"
-       }
-   ]
-}
-EOF
-}
 
 resource "aws_iam_role_policy_attachment" "ssm-policy" {
     role       = "${aws_iam_role.role.name}"
@@ -77,4 +47,14 @@ resource "aws_iam_role_policy_attachment" "cloudwatch-agent-policy" {
 resource "aws_iam_role_policy_attachment" "ssm-params-policy" {
     role       = "${aws_iam_role.role.name}"
     policy_arn = "${aws_iam_policy.ssm_params.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "inspector-full-access" {
+    role       = "${aws_iam_role.role.name}"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonInspectorFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "s3-private-static" {
+    role       = "${aws_iam_role.role.name}"
+    policy_arn = "${aws_iam_policy.private_static_s3.arn}"
 }
