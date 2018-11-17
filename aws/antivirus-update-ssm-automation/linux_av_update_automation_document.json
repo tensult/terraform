@@ -1,8 +1,9 @@
 {
-    "description": "Windows Antivirus Update Automation",
+    "description": "Linux Antivirus Update Automation",
     "schemaVersion": "0.3",
-    "mainSteps": [{
-            "name": "windowsInstances",
+    "mainSteps": [
+        {
+            "name": "linuxInstances",
             "action": "aws:executeAwsApi",
             "onFailure": "Abort",
             "inputs": {
@@ -15,9 +16,12 @@
                         ]
                     },
                     {
-                        "Name": "platform",
+                        "Name": "tag:os_type",
                         "Values": [
-                            "windows"
+                            "RedHat*",
+                            "AmazonLinux*",
+                            "CentOS*",
+                            "Ubuntu*"
                         ]
                     },
                     {
@@ -42,7 +46,7 @@
             "onFailure": "Abort",
             "inputs": {
                 "InstanceIds": [
-                    "{{windowsInstances.instanceIds}}"
+                    "{{linuxInstances.instanceIds}}"
                 ],
                 "DesiredState": "running"
             }
@@ -53,11 +57,11 @@
             "maxAttempts": 3,
             "onFailure": "Continue",
             "inputs": {
-                "DocumentName": "AWS-RunPowerShellScript",
-                "InstanceIds": ["{{windowsInstances.instanceIds}}"],
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{linuxInstances.instanceIds}}"],
                 "Parameters": {
                     "commands": [
-                        "& \"C:\\Program Files\\McAfee\\Agent\\cmdagent.exe\" -c\n"
+                        "/opt/McAfee/agent/bin/cmdagent -c\n"
                     ]
                 }
             }
@@ -77,7 +81,7 @@
             "onFailure": "Abort",
             "inputs": {
                 "InstanceIds": [
-                    "{{windowsInstances.instanceIds}}"
+                    "{{linuxInstances.instanceIds}}"
                 ],
                 "DesiredState": "stopped"
             },
