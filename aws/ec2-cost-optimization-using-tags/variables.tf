@@ -16,8 +16,12 @@ variable "ses_email" {
   description = "SES verified email"
 }
 
+variable "admin_email" {
+  description = "Admin email"
+}
+
 variable "notification_emails" {
   description = "Email to be notified"
-  type = "string"
-  default = ""
+  type        = "string"
+  default     = ""
 }
