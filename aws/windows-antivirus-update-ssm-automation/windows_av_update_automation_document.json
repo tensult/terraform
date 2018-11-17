@@ -1,0 +1,75 @@
+{
+    "description": "Windows Antivirus Update Automation",
+    "schemaVersion": "0.3",
+    "mainSteps": [{
+            "name": "windowsInstances",
+            "action": "aws:executeAwsApi",
+            "onFailure": "Abort",
+            "inputs": {
+                "Service": "ec2",
+                "Api": "DescribeInstances",
+                "Filters": [{
+                        "Name": "instance-state-name",
+                        "Values": [
+                            "stopped"
+                        ]
+                    },
+                    {
+                        "Name": "platform",
+                        "Values": [
+                            "windows"
+                        ]
+                    },
+                    {
+                        "Name": "block-device-mapping.status",
+                        "Values": [
+                            "attached"
+                        ]
+                    }
+                ]
+            },
+            "outputs": [{
+                "Name": "instanceIds",
+                "Selector": "$.Reservations..Instances..InstanceId",
+                "Type": "StringList"
+            }]
+        },
+        {
+            "name": "startInstances",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{windowsInstances.instanceIds}}"
+                ],
+                "DesiredState": "running"
+            }
+        },
+        {
+            "name": "updateAntivirus",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "Windows_Antivirus_Update_Run_Command",
+                "InstanceIds": ["{{windowsInstances.instanceIds}}"]
+            }
+        },
+        {
+            "name": "stopInstances",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{windowsInstances.instanceIds}}"
+                ],
+                "DesiredState": "stopped"
+            },
+            "isEnd": true
+        }
+    ]
+}
