@@ -1,5 +1,5 @@
-resource "aws_iam_role" "cloudwatch_event_rule" {
-  name = "Windows_Antivirus_Update_Automation"
+resource "aws_iam_role" "cloudwatch_event_target" {
+  name = "Antivirus_Update_Automation"
 
   assume_role_policy = <<EOF
 {
@@ -18,8 +18,8 @@ resource "aws_iam_role" "cloudwatch_event_rule" {
 EOF
 }
 
-resource "aws_iam_policy" "cloudwatch_event_rule" {
-  name = "Windows_Antivirus_Update_Automation"
+resource "aws_iam_policy" "cloudwatch_event_target" {
+  name = "Antivirus_Update_Automation"
 
   policy = <<EOF
 {
@@ -39,7 +39,7 @@ resource "aws_iam_policy" "cloudwatch_event_rule" {
 }
 EOF
 }
-resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
-    role       = "${aws_iam_role.cloudwatch_event_rule.name}"
-    policy_arn = "${aws_iam_policy.cloudwatch_event_rule.arn}"
+resource "aws_iam_role_policy_attachment" "av_update_ssm_automation" {
+    role       = "${aws_iam_role.cloudwatch_event_target.name}"
+    policy_arn = "${aws_iam_policy.cloudwatch_event_target.arn}"
 }
