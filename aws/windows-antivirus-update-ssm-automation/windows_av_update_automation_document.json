@@ -53,10 +53,22 @@
             "maxAttempts": 3,
             "onFailure": "Continue",
             "inputs": {
-                "DocumentName": "Windows_Antivirus_Update_Run_Command",
-                "InstanceIds": ["{{windowsInstances.instanceIds}}"]
+                "DocumentName": "AWS-RunPowerShellScript",
+                "InstanceIds": ["{{windowsInstances.instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "& \"C:\\Program Files\\McAfee\\Agent\\cmdagent.exe\" -c\n"
+                    ]
+                }
             }
         },
+        {
+            "name":"waitForAntivirusUpdate",
+            "action":"aws:sleep",
+            "inputs":{
+               "Duration":"PT1M"
+            }
+         },
         {
             "name": "stopInstances",
             "action": "aws:changeInstanceState",
