@@ -9,3 +9,4 @@
 *.tfvars
 *.log
 *.zip
+.DS_Store
