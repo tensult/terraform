@@ -40,7 +40,7 @@ resource "aws_iam_policy" "private_static_s3" {
                "s3:ListBucket"
            ],
            "Resource": [
-               "arn:aws:s3:::arn:aws:s3:::private-static.mphasis*"
+               "arn:aws:s3:::arn:aws:s3:::${var.s3_bucket}*"
            ]
        },
        {
