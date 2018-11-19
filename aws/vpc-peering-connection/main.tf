@@ -8,25 +8,19 @@ provider "aws" {
   region  = "${var.region}"
   profile = "${var.accepter_profile}"
 }
-data "aws_vpcs" "accepter" {
-    provider = "aws.accepter"
-}
-
 
 data "aws_vpc" "accepter" {
     provider = "aws.accepter"
-    id = "${data.aws_vpcs.accepter.ids[0]}"
+    id = "${var.accepter_vpc_id}"
 }
-
 
 locals {
   accepter_account_id = "${element(split(":", data.aws_vpc.accepter.arn), 4)}"
 }
 
-
 resource "aws_vpc_peering_connection" "owner" {
   vpc_id = "${var.owner_vpc_id}"
-  peer_vpc_id   = "${data.aws_vpcs.accepter.ids[0]}"
+  peer_vpc_id   = "${data.aws_vpc.accepter.id}"
   peer_owner_id = "${local.accepter_account_id}"  
 
   tags {
@@ -51,7 +45,7 @@ data "aws_vpc" "owner" {
 
 data "aws_route_tables" "accepter" {
   provider = "aws.accepter"
-  vpc_id = "${data.aws_vpcs.accepter.ids[0]}"
+  vpc_id = "${data.aws_vpc.accepter.id}"
 }
 
 data "aws_route_tables" "owner" {
