@@ -19,10 +19,10 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
-            "nextStep": "changeHostName"
+            "nextStep": "changehostname"
         },
         {
-            "name": "changeHostName",
+            "name": "changehostname",
             "action": "aws:runCommand",
             "onFailure": "Abort",
             "inputs": {
@@ -32,7 +32,7 @@
                     "commands": [
                         "$currentHostname = hostname\n",
                         "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
-                        "$newHostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+                        "$newHostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`hostname`].Value' --output text)\n",
                         "Rename-computer –computername \"$currentHostname\" –newname \"$newHostname\"\n",
                         "Restart-Computer -Force"
                     ]
