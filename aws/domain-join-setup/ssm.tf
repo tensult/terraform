@@ -236,9 +236,9 @@ resource "aws_ssm_document" "Hostname_Ubuntu" {
          "inputs":{
             "runCommand":[
                "sudo su -",
-               "instanceid=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+               "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "hostname=$(aws ec2 describe-instances --instance-id $instanceid --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+               "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
                "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)",
                "echo $hostname > /etc/hostname\n",
                "echo 127.0.0.1 $hostname.$domain > /etc/hosts\n",
