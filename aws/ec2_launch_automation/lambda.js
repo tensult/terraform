@@ -66,17 +66,17 @@ function executeAutomationDocument(documentName, instanceIds) {
 
 function executeAutomation(instanceTags, instanceIds) {
     if (instanceTags.os_type.startsWith('AmazonLinux')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_AMAZON_LINUX.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_AMAZON_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('RedHat')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_REDHAT_LINUX.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_REDHAT_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('CentOS')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_CENTOS_LINUX.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_CENTOS_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('Ubuntu')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_UBUNTU_LINUX.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_UBUNTU_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('Windows2012')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2012.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2012, instanceIds);
     } else if (instanceTags.os_type.startsWith('Windows2016')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2016.instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2016, instanceIds);
     }
 }
 
