@@ -242,7 +242,7 @@ resource "aws_ssm_document" "Hostname_Ubuntu" {
                "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)",
                "echo $hostname > /etc/hostname\n",
                "echo 127.0.0.1 $hostname.$domain > /etc/hosts\n",
-               "echo "\$ipv4 $hostname"\ >> /etc/hosts\n",
+               "echo \"$ipv4 $hostname\" >> /etc/hosts\n",
                "reboot"
             ]
          }
