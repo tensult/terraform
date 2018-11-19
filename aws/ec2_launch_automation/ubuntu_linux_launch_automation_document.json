@@ -1,0 +1,81 @@
+{
+    "description": "Launch Automation for Ubuntu Linux instance",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to run launch setup"
+        }
+    },
+    "mainSteps": [{
+            "name": "waitForInstancesToStart",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "changeHostName"
+        },
+        {
+            "name": "changeHostName",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "sudo su -",
+                        "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+                        "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+                        "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+                        "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)",
+                        "echo $hostname > /etc/hostname\n",
+                        "echo 127.0.0.1 $hostname.$domain > /etc/hosts\n",
+                        "echo \"$ipv4 $hostname\" >> /etc/hosts\n",
+                        "reboot"
+                    ]
+                }
+            },
+            "nextStep": "waitForInstancesToStartAfterReboot"
+        },
+        {
+            "name": "waitForInstancesToStartAfterReboot",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "joinDomain"
+        },
+        {
+            "name": "joinDomain",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+                        "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+                        "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+                        "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
+                        "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain\n",
+                        "sudo shutdown -r 1"
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,82 @@
+{
+    "description": "Launch Automation for Windows 2016 instance",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to run launch setup"
+        }
+    },
+    "mainSteps": [{
+            "name": "waitForInstancesToStart",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "changeHostName"
+        },
+        {
+            "name": "changeHostName",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "AWS-RunPowerShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "$currentHostname = hostname\n",
+                        "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
+                        "$newHostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+                        "Rename-computer –computername \"$currentHostname\" –newname \"$newHostname\"\n",
+                        "Restart-Computer -Force"
+                    ]
+                }
+            },
+            "nextStep": "waitForInstancesToStartAfterReboot"
+        },
+        {
+            "name": "waitForInstancesToStartAfterReboot",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "joinDomain"
+        },
+        {
+            "name": "joinDomain",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "AWS-RunPowerShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "$ipdns = (Get-SSMParameterValue -Name /domain/dns_ip).Parameters[0].Value\n",
+                        "$domain = (Get-SSMParameterValue -Name /domain/name).Parameters[0].Value\n",
+                        "$ouPath = (Get-SSMParameterValue -Name /domain/ou_path).Parameters[0].Value\n",
+                        "$username = (Get-SSMParameterValue -Name /domain/username).Parameters[0].Value\n",
+                        "$domain_username = \"$domain\\$username\"\n",
+                        "echo $domain_username\n",
+                        "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
+                        "$credential = New-Object System.Management.Automation.PSCredential($domain_username,$password)\n",
+                        "Set-DnsClientServerAddress \"Ethernet\" -ServerAddresses $ipdns\n",
+                        "Add-Computer -DomainName $domain -OUPath \"$ouPath\" -Credential $credential\n",
+                        "Restart-Computer -Force"
+                    ]
+                }
+            }
+        }
+    ]
+}
