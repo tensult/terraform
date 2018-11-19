@@ -30,6 +30,7 @@ resource "aws_iam_policy" "instance_launch_automation" {
        {
            "Effect": "Allow",
            "Action": [
+               "ec2:CreateTags",
                "ec2:DescribeInstances",
                "iam:PassRole",
                "ssm:SendCommand"
