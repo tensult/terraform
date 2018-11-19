@@ -1,0 +1,101 @@
+{
+    "description": "Antivirus Update Automation",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to update Antivirus"
+        },
+        "platform": {
+            "type": "String",
+            "description": "Operating system platform (windows or linux)"
+        }
+    },
+    "mainSteps": [{
+            "name": "startInstances",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "DesiredState": "running"
+            },
+            "nextStep": "executeAntivirusUpdate"
+        },
+        {
+            "name": "executeAntivirusUpdate",
+            "action": "aws:branch",
+            "inputs": {
+                "Choices": [{
+                        "NextStep": "windowsUpdateAntivirus",
+                        "Variable": "{{platform}}",
+                        "StringEquals": "windows"
+                    },
+                    {
+                        "NextStep": "linuxUpdateAntivirus",
+                        "Variable": "{{platform}}",
+                        "StringEquals": "linux"
+                    }
+                ],
+                "Default": "waitForAntivirusUpdate"
+            }
+        },
+        {
+            "name": "windowsUpdateAntivirus",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunPowerShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "& \"C:\\Program Files\\McAfee\\Agent\\cmdagent.exe\" -c\n"
+                    ]
+                }
+            },
+            "nextStep": "waitForAntivirusUpdate"
+        },
+        {
+            "name": "linuxUpdateAntivirus",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "/opt/McAfee/agent/bin/cmdagent -c\n"
+                    ]
+                }
+            },
+            "nextStep": "waitForAntivirusUpdate"
+        },
+        {
+            "name": "waitForAntivirusUpdate",
+            "action": "aws:sleep",
+            "inputs": {
+                "Duration": "PT1M"
+            },
+            "nextStep": "stopInstances"
+        },
+        {
+            "name": "stopInstances",
+            "action": "aws:changeInstanceState",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "DesiredState": "stopped"
+            },
+            "isEnd": true
+        }
+    ]
+}

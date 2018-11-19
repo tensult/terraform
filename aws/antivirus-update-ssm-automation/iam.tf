@@ -1,5 +1,5 @@
-resource "aws_iam_role" "cloudwatch_event_target" {
-  name = "Antivirus_Update_Automation"
+resource "aws_iam_role" "antivirus_automation" {
+  name = "Antivirus-Update-Automation"
 
   assume_role_policy = <<EOF
 {
@@ -8,18 +8,20 @@ resource "aws_iam_role" "cloudwatch_event_target" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "events.amazonaws.com"
+        "Service": [
+          "lambda.amazonaws.com", 
+          "ssm.amazonaws.com"
+        ]
       },
-      "Effect": "Allow",
-      "Sid": ""
+      "Effect": "Allow"
     }
   ]
 }
 EOF
 }
 
-resource "aws_iam_policy" "cloudwatch_event_target" {
-  name = "Antivirus_Update_Automation"
+resource "aws_iam_policy" "antivirus_automation" {
+  name = "Antivirus-Update-Automation"
 
   policy = <<EOF
 {
@@ -29,8 +31,9 @@ resource "aws_iam_policy" "cloudwatch_event_target" {
            "Effect": "Allow",
            "Action": [
                "ec2:DescribeInstances",
-               "ec2:StartInstances",
+               "ec2:DescribeRegions",
                "ec2:StopInstances",
+               "iam:PassRole",
                "ssm:SendCommand"
            ],
            "Resource": "*"
@@ -39,7 +42,13 @@ resource "aws_iam_policy" "cloudwatch_event_target" {
 }
 EOF
 }
-resource "aws_iam_role_policy_attachment" "av_update_ssm_automation" {
-    role       = "${aws_iam_role.cloudwatch_event_target.name}"
-    policy_arn = "${aws_iam_policy.cloudwatch_event_target.arn}"
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
+    role       = "${aws_iam_role.antivirus_automation.name}"
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
+    role       = "${aws_iam_role.antivirus_automation.name}"
+    policy_arn = "${aws_iam_policy.antivirus_automation.arn}"
 }
