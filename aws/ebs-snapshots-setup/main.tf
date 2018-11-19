@@ -50,7 +50,7 @@ resource "aws_dlm_lifecycle_policy" "snapshot_policy" {
     }
 
     target_tags {
-      Snapshot = "true"
+      snapshot = "true"
     }
   }
 }
