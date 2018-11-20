@@ -51,7 +51,7 @@ resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
 
 data "archive_file" "security_groups" {
   type        = "zip"
-  source_file = "security_groups.js"
+  source_dir = "sg-lambda"
   output_path = "sg-lambda.zip"
 }
 
@@ -69,6 +69,7 @@ resource "aws_lambda_function" "security_groups" {
       notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
       sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
+      adminEmail = "${var.admin_email}"
     }
   }
 }
@@ -97,7 +98,6 @@ resource "aws_lambda_function" "instance_tags" {
 
   environment {
     variables = {
-      sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
     }
   }

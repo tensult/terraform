@@ -3,25 +3,24 @@
 const AWS = require('aws-sdk');
 
 const config = new AWS.ConfigService();
-const ses = new AWS.SES({
-    region: "eu-west-1"
-});
+
 
 const defaultTags = {
-    'Name': 'string',
-    'HostName': 'string',
-    'OS Type': 'string',
-    'Application': 'string',
-    'Project Name': 'string',
-    'Project Code': 'string',
-    'Change No': 'string',
-    'Primary owner': 'email',
-    'Secondary owner': 'email',
-    'Provision Type': 'string',
-    'Provision Date': 'date',
-    'Expiry Date': 'date',
-    'Server Role': 'string',
-    'Business Unit': 'string'
+    'name': 'string',
+    'hostname': 'string',
+    'os_type': 'string',
+    'application': 'string',
+    'project_name': 'string',
+    'project_code': 'string',
+    'change_no': 'string',
+    'primary_owner': 'email',
+    'secondary_owner': 'email',
+    'provision_type': 'string',
+    'provision_date': 'date',
+    'expiry_date': 'date',
+    'server_role': 'string',
+    'business_unit': 'string',
+    'snapshot': "boolean"
 }
 
 //regular expression
@@ -110,16 +109,25 @@ function isApplicable(configurationItem, event) {
     return (status === 'OK' || status === 'ResourceDiscovered') && eventLeftScope === false;
 }
 
+function convertKeysToLowercase(tags) {
+    const keys = Object.keys(tags);
+    return keys.reduce((newTags, key) => {
+        const convertedKey = key.toLowerCase();
+        newTags[convertedKey] = tags[key];
+        return newTags
+    }, {})
+}
 
 function checkTags(tags) {
+    const newTags = convertKeysToLowercase(tags);
     return Object.keys(defaultTags).every((tagName) => {
-        if (tags[tagName] && defaultTags[tagName] === "email") {
-            return emailRegExp.test(tags[tagName])
+        if (newTags[tagName] && defaultTags[tagName] === "email") {
+            return emailRegExp.test(newTags[tagName])
         }
-        if (tags[tagName] && defaultTags[tagName] === "date") {
-            return !isNaN(new Date(tags[tagName]))
+        if (newTags[tagName] && defaultTags[tagName] === "date") {
+            return !isNaN(new Date(newTags[tagName]))
         }
-        return tags[tagName];
+        return newTags[tagName];
     });
 }
 
@@ -137,58 +145,6 @@ function evaluateChangeNotificationCompliance(configurationItem) {
     return 'NON_COMPLIANT';
 }
 
-function sendNotificationToUsers(body, emails) {    
-    let params = {
-        Destination: { /* required */
-            ToAddresses: [`${process.env.sesEmail}`],
-        },
-        Message: { /* required */
-            Body: { /* required */
-                Html: {
-                    Data: `Ec2 instances which are missing tags : ${ JSON.stringify(body)}`, /* required */
-                    Charset: 'utf-8'
-                }
-            },
-            Subject: { /* required */
-                Data: "Add tags",
-                Charset: 'utf-8'
-            }
-        },
-        Source: `${process.env.sesEmail}`, /* required */
-    }
-    if(emails && emails.length) {
-        params.Destination.CcAddresses = emails;
-    }
-
-    return ses.sendEmail(params).promise();
-}
-
-function prepareEmailBody(configurationItem) {
-    const body = {
-        "accountId": configurationItem.accountId,
-        "accountName": `${process.env.accountName}`,
-        "resourceType": configurationItem.resourceType,
-        "resourceId": configurationItem.resourceId,
-        "resourceName": configurationItem.resourceName,
-        "tags": configurationItem.tags
-    }
-    return body;
-}
-
-function fetchEmails(configurationItem) {
-    let emails = []
-    if (configurationItem.tags) {
-        if (configurationItem.tags["Primary owner"]) {
-            emails.push(configurationItem.tags["Primary owner"]);
-        }
-        if (configurationItem.tags["Secondary owner"]) {
-            emails.push(configurationItem.tags["Secondary owner"]);
-        }
-    }
-    return emails;
-}
-
-
 // Receives the event and context from AWS Lambda.
 exports.handler = async (event) => {
     try {
@@ -203,11 +159,6 @@ exports.handler = async (event) => {
         // Sends the evaluation results to AWS Config.
         const putEvaluationsResponse = await putEvaluations(configurationItem, compliance, event.resultToken);
         console.log(putEvaluationsResponse);
-        if (compliance === "NON_COMPLIANT") {
-            const emailBody = prepareEmailBody(configurationItem);
-            const emails = fetchEmails(configurationItem);
-            await sendNotificationToUsers(emailBody, emails);
-        }
     } catch (err) {
         throw err;
     }
