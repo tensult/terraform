@@ -16,6 +16,62 @@ const defaultTags = {
     'snapshot': "boolean"
 }
 
+const missingTagsMailBody = (instancesOfMissingTags)=>{
+    return `<!DOCTYPE html>
+    <html>
+    <body>
+    <p><font size="+2"></font>Dear User,</font></p>
+    <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created does not meet the tagging - policies as per the standard followed by Mphasis Limited. Below are the mandatory tags that needs to be added during a fresh deployment.
+    <p><font size="+1">Non-compliant servers:</font></p>
+    </body>
+    </html>
+    ${prepareMailBody(instancesOfMissingTags)} 
+    <p><font size="+1">Mandatory Tags List:</font></p>
+    ${prepareMailBody([defaultTags])}
+    <p><font size="+1">Note:</font></p>  
+    1. Please make sure to add all the tags mentioned above for future deployments.<br>
+    2. Please do not delete any existing tags from the machines you have access.
+    <p><font size="+1">Have a great day!</font></p>
+    </body></html>`
+}
+
+const expiryInstancesMailBody = (groupedInstancesByOwner)=>{
+    return `<!DOCTYPE html>
+    <html>
+    <body>
+    <p><font size="+2"></font>Dear User,</font></p>
+    <font size="+3" color="red">Attention:</font> This is to inform you that the EC2 resources you have created is expiring in one week. If you want to continue using the instance please make sure to change the value in “expiry_date” tag. Instance details are attached below.
+    <p><font size="+1">Server Details:</font></p>
+    </body>
+    </html>
+    ${prepareMailBody(groupedInstancesByOwner)} 
+    <p><font size="+1">Note:</font></p>  
+    1. Expired instances will be automatically stopped.<br>
+    2. Please make sure to plan your activities accordingly.
+    <p><font size="+1">Have a great day!</font></p>
+    </body></html>`
+}
+
+const expiredInstancesMailBody = (groupedInstancesByOwner)=>{
+    return `<!DOCTYPE html>
+    <html>
+    <body>
+    <p><font size="+2"></font>Dear User,</font></p>
+    <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created has expired. As a best practice instance is stopped to save the cost. The resource details is attached below.
+    <p><font size="+1">Server Details:</font></p>
+    </body>
+    </html>
+    ${prepareMailBody(groupedInstancesByOwner)} 
+    <p><font size="+1">Note:</font></p>  
+    1. The instance is in stopped state which will still incur the cost of storage.<br>
+    2. Please reach out to CIO Team to extend the expiry date or to terminate the instance(s) if you don’t need them anymore.
+    <p><font size="+1">Have a great day!</font></p>
+    </body></html>`
+}
+
+
+
+
 //regular expression
 const emailRegExp = new RegExp(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
@@ -40,8 +96,8 @@ function prepareHtml(table, headers) {
     #customers tr:nth-child(even){background-color: #f2f2f2;}
     #customers tr:hover {background-color: #ddd;}
     #customers th {
-        padding-top: 12px;
-        padding-bottom: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         text-align: left;
         background-color: #4CAF50;
         color: white;
@@ -117,6 +173,9 @@ function getRequiredInstanceInfo(instance) {
         ipAddress: undefined
     }
     instance.Tags.forEach((tag) => {
+        if(process.env.accountName){
+            instanceObject.accountName = process.env.accountName   
+        }
         if (instance.InstanceId) {
             instanceObject.instanceId = instance.InstanceId
         }
@@ -167,3 +226,6 @@ exports.groupInstancesByOwners = groupInstancesByOwners;
 exports.prepareMailBody = prepareMailBody;
 exports.convertKeysToLowercase = convertKeysToLowercase;
 exports.convertToLoweCase = convertToLoweCase;
+exports.missingTagsMailBody = missingTagsMailBody;
+exports.expiryInstancesMailBody = expiryInstancesMailBody;
+exports.expiredInstancesMailBody = expiredInstancesMailBody;
