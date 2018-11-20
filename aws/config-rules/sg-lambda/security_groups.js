@@ -1,6 +1,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const utils = require('./utills');
 
 const config = new AWS.ConfigService();
 const ses = new AWS.SES({
@@ -138,13 +139,13 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 function sendNotificationToUsers(body) {
     let params = {
         Destination: { /* required */
-            ToAddresses: [`${process.env.sesEmail}`],
-            CcAddresses: process.env.notificationEmails.split(/[, ]+/)
+            ToAddresses: [`${process.env.adminEmail}`],
         },
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: `Ec2 instances with improper security groups : ${JSON.stringify(body)}` , /* required */
+                    Data: `Ec2 instances with improper security groups.
+                    ${body}` , /* required */
                     Charset: 'utf-8'
                 }
             },
@@ -158,15 +159,15 @@ function sendNotificationToUsers(body) {
     return ses.sendEmail(params).promise();
 }
 
-function prepareEmailBody(configurationItem) {
-    const body = {
+function getEmailBody(configurationItem) {
+    const resourceObject = {
         "accountId": configurationItem.accountId,
         "accountName": `${process.env.accountName}`,
-        "resourceType": configurationItem.resourceType,
-        "resourceId": configurationItem.resourceId,
+        "instanceType": configurationItem.resourceType,
+        "instanceId": configurationItem.resourceId,
         "resourceName": configurationItem.resourceName
     }
-    return body;
+    return utils.prepareMailBody([resourceObject]);
 }
 
 
@@ -186,7 +187,7 @@ exports.handler = async (event) => {
         const putEvaluationsResponse = await putEvaluations(configurationItem, compliance, event.resultToken);
         console.log(JSON.stringify(putEvaluationsResponse,null,2));
         if (compliance === "NON_COMPLIANT") {
-            const emailBody = prepareEmailBody(configurationItem);
+            const emailBody = getEmailBody(configurationItem);
             await sendNotificationToUsers(emailBody);
         }
     } catch (err) {
