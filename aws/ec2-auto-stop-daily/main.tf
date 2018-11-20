@@ -70,6 +70,14 @@ resource "aws_lambda_function" "lambda_function" {
   timeout          = "300"
 }
 
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.lambda_function.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_event_rule.daily_stop.arn}"
+}
+
 resource "aws_cloudwatch_event_rule" "daily_stop" {
   name        = "Daily-EC2-Stop-instances"
   description = "Stops the instances"
