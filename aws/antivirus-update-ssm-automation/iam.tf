@@ -34,7 +34,8 @@ resource "aws_iam_policy" "antivirus_automation" {
                "ec2:StartInstances",
                "ec2:StopInstances",
                "iam:PassRole",
-               "ssm:SendCommand"
+               "ssm:SendCommand",
+               "ssm:StartAutomationExecution"
            ],
            "Resource": "*"
        }

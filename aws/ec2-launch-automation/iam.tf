@@ -33,7 +33,9 @@ resource "aws_iam_policy" "instance_launch_automation" {
                "ec2:CreateTags",
                "ec2:DescribeInstances",
                "iam:PassRole",
-               "ssm:SendCommand"
+               "ssm:SendCommand",
+               "ssm:StartAutomationExecution"
+
            ],
            "Resource": "*"
        }
