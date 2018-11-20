@@ -31,11 +31,11 @@ resource "aws_iam_policy" "antivirus_automation" {
            "Effect": "Allow",
            "Action": [
                "ec2:DescribeInstances",
+               "ec2:DescribeInstanceStatus",
                "ec2:StartInstances",
                "ec2:StopInstances",
-               "iam:PassRole",
-               "ssm:SendCommand",
-               "ssm:StartAutomationExecution"
+               "iam:PassRole",               
+               "ssm:*"
            ],
            "Resource": "*"
        }

@@ -43,24 +43,28 @@ exports.handler = async () => {
     try {
         const stoppedInstances = await getStoppedInstances();
         const instanceIds = getInstanceIdsByPlatform(stoppedInstances);
+        let ssmAutomationExecutionIds = [];
         if (instanceIds.windows && instanceIds.windows.length) {
-            await ssm.startAutomationExecution({
+            const execution = await ssm.startAutomationExecution({
                 DocumentName: process.env.AV_UPDATE_AUTOMATION_DOCUMENT_NAME,
                 Parameters: {
                     instanceIds: instanceIds.windows,
                     platform: "windows"
                 }
-            });
+            }).promise();
+            ssmAutomationExecutionIds.put(execution.AutomationExecutionId);
         }
         if (instanceIds.linux && instanceIds.linux.length) {
-            await ssm.startAutomationExecution({
+            const execution = await ssm.startAutomationExecution({
                 DocumentName: process.env.AV_UPDATE_AUTOMATION_DOCUMENT_NAME,
                 Parameters: {
                     instanceIds: instanceIds.linux,
                     platform: "linux"
                 }
-            });
+            }).promise();
+            ssmAutomationExecutionIds.put(execution.AutomationExecutionId);
         }
+        console.log("SSMAutomationExecutionIds", ssmAutomationExecutionIds);
         return;
     } catch (err) {
         throw err;

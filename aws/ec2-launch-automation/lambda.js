@@ -61,7 +61,10 @@ function executeAutomationDocument(documentName, instanceIds) {
         Parameters: {
             instanceIds
         }
-    }).promise();
+    }).promise()
+    .then((response) => {
+        console.log("AutomationExecutionId", response.AutomationExecutionId);
+    });
 }
 
 function executeAutomation(instanceIds, instanceTags) {
