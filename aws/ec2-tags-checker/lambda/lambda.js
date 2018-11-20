@@ -7,6 +7,8 @@ const ses = new AWS.SES({
 
 const ec2 = new AWS.EC2();
 
+const fifteenDaysInMilliSecs = 1296000000 ;
+
 function getEc2Instances(stateNames, tagKey, tagValue) {
     const filters = [];
     if (stateNames && stateNames.length) {
@@ -79,7 +81,8 @@ function collectEc2InstancesToBeExpired(ec2Reservations) {
     }, []).filter((instance) => {
         return instance.Tags && instance.Tags.some((tag) => {
             if (utils.convertToLoweCase(tag.Key) === "expiry_date") {
-                return new Date(tag.Value).getTime() < Date.now() + 604800000;
+                return new Date(tag.Value).getTime() < Date.now() + fifteenDaysInMilliSecs &&
+                    new Date(tag.Value).getTime() > Date.now();
             }
             return false;
         });
@@ -122,10 +125,8 @@ async function sendNotificationsForMissingTags(ec2Instances) {
         // sending notification to admin user to know that tags were missed to the instances.
         let instancesOfMissingTags = collectEc2InstancesWereMissingTags(ec2Instances.Reservations);
         if (instancesOfMissingTags && instancesOfMissingTags.length) {
-            const alertMailBody = `Summary of instances were missing tags. 
-                                   Account Name : ${process.env.accountName}
-                                   ${utils.prepareMailBody(instancesOfMissingTags)}`;
-            const alertMailSubject = "Tags were missed to the instances";
+            const alertMailBody = utils.missingTagsMailBody(instancesOfMissingTags);
+            const alertMailSubject = "Alert: EC2 Instances Missing Tags";
             await sendNotificationToUsers(alertMailBody, alertMailSubject, [process.env.adminEmail]);
         }
 
@@ -134,10 +135,8 @@ async function sendNotificationsForMissingTags(ec2Instances) {
         const ownerEmails = Object.keys(groupedInstancesByOwners);
         if (ownerEmails && ownerEmails.length) {
             const promises = ownerEmails.map((email) => {
-                const alertMailBody = `Tags were missed to the instances.. 
-                                      Account Name : ${process.env.accountName}
-                                      ${utils.prepareMailBody(groupedInstancesByOwners[email])}`;
-                const alertMailSubject = "Tags were missed to the instances";
+                const alertMailBody = utils.missingTagsMailBody(groupedInstancesByOwners[email]);
+                const alertMailSubject = "Alert: EC2 Instances Missing Tags";
                 return sendNotificationToUsers(alertMailBody, alertMailSubject, [email]);
             })
             await Promise.all(promises);
@@ -152,10 +151,8 @@ async function sendNotificationsForExpiryDate(ec2Instances) {
         // sending notification to admin user to know that instances are going to expire in a week
         let expiringInstances = collectEc2InstancesToBeExpired(ec2Instances.Reservations);
         if (expiringInstances && expiringInstances.length) {
-            const alertMailBody = `Summary mail for instances are going to expire in a week. 
-                                Account Name : ${process.env.accountName}
-                                ${utils.prepareMailBody(expiringInstances)}`;
-            const alertMailSubject = "Ec2 instances are expiring";
+            const alertMailBody = utils.expiryInstancesMailBody(expiringInstances);
+            const alertMailSubject = "Alert: Ec2 instances are going to expire";
             await sendNotificationToUsers(alertMailBody, alertMailSubject, [process.env.adminEmail]);
         }
 
@@ -164,10 +161,8 @@ async function sendNotificationsForExpiryDate(ec2Instances) {
         const ownerEmails = Object.keys(groupedInstancesByOwners);
         if (ownerEmails && ownerEmails.length) {
             const promises = ownerEmails.map((email) => {
-                const alertMailBody = `Instances are going to expire in a week. 
-                                    Account Name : ${process.env.accountName}
-                                    ${utils.prepareMailBody(groupedInstancesByOwners[email])}`;
-                const alertMailSubject = "Ec2 instances are expiring";
+                const alertMailBody = utils.expiryInstancesMailBody(groupedInstancesByOwners[email]);
+                const alertMailSubject = "Alert: Ec2 instances are going to expire";
                 return sendNotificationToUsers(alertMailBody, alertMailSubject, [email]);
             })
             await Promise.all(promises);
@@ -188,11 +183,9 @@ async function stopInstancesByExpiryDate(ec2Instances) {
             })
             let doStopRunningEc2Instances = await stopRunningEc2Instances(filteredRunningEc2InstanceIds);
             console.log("Instances were stopped", doStopRunningEc2Instances);
-            const notificationMailBody = `Ec2 instanceIds of stopped instances which are crossed the expired date. 
-                    Account Name : ${process.env.accountName}
-                    ${utils.prepareMailBody(filteredRunningEc2Instances)}`;
-            const notificationMailSubject = "Ec2 instances are stopped";
-            await sendNotificationToUsers(notificationMailBody, notificationMailSubject,[process.env.adminEmail]);
+            const notificationMailBody = utils.expiredInstancesMailBody(filteredRunningEc2Instances);
+            const notificationMailSubject = "Alert: Ec2 instances are stopped";
+            await sendNotificationToUsers(notificationMailBody, notificationMailSubject, [process.env.adminEmail]);
         }
     } catch (error) {
         throw error;
