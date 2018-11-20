@@ -18,8 +18,8 @@ resource "aws_lambda_function" "lambda_function" {
           LAUNCH_AUTOMATION_DOCUMENT_REDHAT_LINUX = "${aws_ssm_document.redhat_linux_automation.name}"
           LAUNCH_AUTOMATION_DOCUMENT_CENTOS_LINUX = "${aws_ssm_document.centos_linux_automation.name}"
           LAUNCH_AUTOMATION_DOCUMENT_UBUNTU_LINUX = "${aws_ssm_document.ubuntu_linux_automation.name}"
-          LAUNCH_AUTOMATION_DOCUMENT_WINDOW_2012 = "${aws_ssm_document.windows2012_linux_automation.name}"
-          LAUNCH_AUTOMATION_DOCUMENT_WINDOW_2016 = "${aws_ssm_document.windows2016_linux_automation.name}"
+          LAUNCH_AUTOMATION_DOCUMENT_WINDOWS_2012 = "${aws_ssm_document.windows2012_linux_automation.name}"
+          LAUNCH_AUTOMATION_DOCUMENT_WINDOWS_2016 = "${aws_ssm_document.windows2016_linux_automation.name}"
         }
   }
 }

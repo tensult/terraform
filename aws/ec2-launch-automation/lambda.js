@@ -14,9 +14,13 @@ function getInstances(instanceIds) {
 }
 
 function addVolumeTags(volumeIds, tags) {
+    const volumeTags = tags.filter((tag) => {
+        return !tag.Key.startsWith("aws:");
+    });
+
     return ec2.createTags({
         Resources: volumeIds,
-        Tags: tags
+        Tags: volumeTags
     }).promise();
 }
 
@@ -30,8 +34,8 @@ function getVolumeIds(ec2DescribeInstancesResponse) {
     const volumeIds = [];
     for (let reservation of ec2DescribeInstancesResponse.Reservations) {
         for (let instance of reservation.Instances) {
-            for(let blockDevice of instance.BlockDeviceMappings) {
-                if(blockDevice.Ebs) {
+            for (let blockDevice of instance.BlockDeviceMappings) {
+                if (blockDevice.Ebs) {
                     volumeIds.push(blockDevice.Ebs.VolumeId);
                 }
             }
@@ -40,17 +44,13 @@ function getVolumeIds(ec2DescribeInstancesResponse) {
     return volumeIds;
 }
 
-function getInstanceTags(event) {
-    return event.detail.requestParameters.tagSpecificationSet.items.filter((tagSet) => {
-        return tagSet.resourceType === "instance";
-    }).map((tagSet) => {
-        return tagSet.tags;
-    });
+function getInstanceTags(ec2DescribeInstancesResponse) {
+    return ec2DescribeInstancesResponse.Reservations[0].Instances[0].Tags;
 }
 
-function getInstanceTagsMap(event) {
-    getInstanceTags(event).reduce((tagsMap, tag) => {
-        tagsMap[tag.key] = tag.value;
+function getInstanceTagsMap(ec2DescribeInstancesResponse) {
+    return getInstanceTags(ec2DescribeInstancesResponse).reduce((tagsMap, tag) => {
+        tagsMap[tag.Key] = tag.Value;
         return tagsMap;
     }, {});
 }
@@ -64,7 +64,12 @@ function executeAutomationDocument(documentName, instanceIds) {
     }).promise();
 }
 
-function executeAutomation(instanceTags, instanceIds) {
+function executeAutomation(instanceIds, instanceTags) {
+    console.log("instanceTags", instanceTags);
+    if(!instanceTags.os_type) {
+        console.error("No os_type tag so ignoring automation:", instanceIds);
+        return;
+    }
     if (instanceTags.os_type.startsWith('AmazonLinux')) {
         return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_AMAZON_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('RedHat')) {
@@ -74,9 +79,9 @@ function executeAutomation(instanceTags, instanceIds) {
     } else if (instanceTags.os_type.startsWith('Ubuntu')) {
         return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_UBUNTU_LINUX, instanceIds);
     } else if (instanceTags.os_type.startsWith('Windows2012')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2012, instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOWS_2012, instanceIds);
     } else if (instanceTags.os_type.startsWith('Windows2016')) {
-        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOW2016, instanceIds);
+        return executeAutomationDocument(process.env.LAUNCH_AUTOMATION_DOCUMENT_WINDOWS_2016, instanceIds);
     }
 }
 
@@ -84,11 +89,11 @@ exports.handler = async (event) => {
     try {
         console.log("Received", JSON.stringify(event, null, 2));
         const instanceIds = getInstanceIds(event);
-        const instanceTags = getInstanceTagsMap(event);
-        await executeAutomation(instanceIds, instanceTags);
         const ec2DescribeInstancesResponse = await getInstances(instanceIds);
+        const instanceTags = getInstanceTagsMap(ec2DescribeInstancesResponse);
+        await executeAutomation(instanceIds, instanceTags);
         const volumeIds = getVolumeIds(ec2DescribeInstancesResponse);
-        await addVolumeTags(volumeIds, getInstanceTags(event));
+        await addVolumeTags(volumeIds, getInstanceTags(ec2DescribeInstancesResponse));
         return;
     } catch (err) {
         throw err;
