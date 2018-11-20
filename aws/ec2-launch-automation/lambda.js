@@ -82,6 +82,7 @@ function executeAutomation(instanceTags, instanceIds) {
 
 exports.handler = async (event) => {
     try {
+        console.log("Received", JSON.stringify(event, null, 2));
         const instanceIds = getInstanceIds(event);
         const instanceTags = getInstanceTagsMap(event);
         await executeAutomation(instanceIds, instanceTags);
