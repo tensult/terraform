@@ -17,6 +17,10 @@ resource "aws_ssm_patch_baseline" "AL2" {
     values = ["Security"]
   }
 
+  global_filter {
+    key    = "SEVERITY"
+    values = ["Low","Medium"]
+  }
 
   approval_rule {
     approve_after_days = 7
@@ -31,14 +35,11 @@ resource "aws_ssm_patch_baseline" "AL2" {
       key    = "CLASSIFICATION"
       values = ["Security"]
     }
+
+    patch_filter {
+      key    = "SEVERITY"
+      values = ["Critical"]
+    }
   }
 
-  approval_rule {
-    approve_after_days = 7
-    
- patch_filter {
-      key    = "PRODUCT"
-      values = ["AmazonLinux2"]
-   }
-  }
 }
