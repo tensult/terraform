@@ -11,20 +11,12 @@ resource "aws_ssm_patch_baseline" "AL2" {
   operating_system = "${var.os_type}"
 
 
-  global_filter {
-    key    = "PRODUCT"
-    values = ["AmazonLinux2"]
-  }
 
   global_filter {
     key    = "CLASSIFICATION"
     values = ["Security"]
   }
 
-  global_filter {
-    key    = "MSRC_SEVERITY"
-    values = ["Critical"]
-  }
 
   approval_rule {
     approve_after_days = 7
@@ -37,12 +29,7 @@ resource "aws_ssm_patch_baseline" "AL2" {
 
     patch_filter {
       key    = "CLASSIFICATION"
-      values = ["SecurityUpdates"]
-    }
-
-    patch_filter {
-      key    = "MSRC_SEVERITY"
-      values = ["Critical"]
+      values = ["Security"]
     }
   }
 
