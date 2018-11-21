@@ -40,14 +40,15 @@ const expiryInstancesMailBody = (groupedInstancesByOwner)=>{
     <html>
     <body>
     <p><font size="+2"></font>Dear User,</font></p>
-    <font size="+3" color="red">Attention:</font> This is to inform you that the EC2 resources you have created is expiring in one week. If you want to continue using the instance please make sure to change the value in “expiry_date” tag. Instance details are attached below.
+    <font size="+3" color="red">Attention:</font> This is to inform you that the EC2 resources you have created is expiring with in 15 days. If you want to continue using the instance please make sure to change the value in “expiry_date” tag. Instance details are attached below.
     <p><font size="+1">Server Details:</font></p>
     </body>
     </html>
     ${prepareMailBody(groupedInstancesByOwner)} 
     <p><font size="+1">Note:</font></p>  
     1. Expired instances will be automatically stopped.<br>
-    2. Please make sure to plan your activities accordingly.
+    2. Please make sure to plan your activities accordingly.<br>
+    3. Please reach out to CIO Team to make changes to the tag.
     <p><font size="+1">Have a great day!</font></p>
     </body></html>`
 }

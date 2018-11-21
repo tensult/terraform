@@ -136,7 +136,7 @@ function evaluateChangeNotificationCompliance(configurationItem) {
 }
 
 //send email using aws ses service 
-function sendNotificationToUsers(body) {
+function sendNotificationToUsers(body, subject) {
     let params = {
         Destination: { /* required */
             ToAddresses: [`${process.env.adminEmail}`],
@@ -144,13 +144,12 @@ function sendNotificationToUsers(body) {
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: `Ec2 instances with improper security groups.
-                    ${body}` , /* required */
+                    Data: body, /* required */
                     Charset: 'utf-8'
                 }
             },
             Subject: { /* required */
-                Data: "Fix security groups",
+                Data: subject,
                 Charset: 'utf-8'
             }
         },
@@ -161,13 +160,12 @@ function sendNotificationToUsers(body) {
 
 function getEmailBody(configurationItem) {
     const resourceObject = {
-        "accountId": configurationItem.accountId,
         "accountName": `${process.env.accountName}`,
         "instanceType": configurationItem.resourceType,
-        "instanceId": configurationItem.resourceId,
-        "resourceName": configurationItem.resourceName
+        "securityGroupId": configurationItem.resourceId,
+        "securityName": configurationItem.resourceName
     }
-    return utils.prepareMailBody([resourceObject]);
+    return utils.securityGroupMailBody([resourceObject]);
 }
 
 
@@ -187,8 +185,9 @@ exports.handler = async (event) => {
         const putEvaluationsResponse = await putEvaluations(configurationItem, compliance, event.resultToken);
         console.log(JSON.stringify(putEvaluationsResponse,null,2));
         if (compliance === "NON_COMPLIANT") {
-            const emailBody = getEmailBody(configurationItem);
-            await sendNotificationToUsers(emailBody);
+            const alertMailBody = getEmailBody(configurationItem);
+            const alertMailSubject = "Alert: Security Group Ports";
+            await sendNotificationToUsers(alertMailBody,alertMailSubject);
         }
     } catch (err) {
         throw err;

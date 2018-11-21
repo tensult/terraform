@@ -1,4 +1,22 @@
 
+
+const securityGroupMailBody = (resourceObject)=>{
+    return `<!DOCTYPE html>
+    <html>
+    <body>
+    <p><font size="+2"></font>Dear User,</font></p>
+    <font size="+3" color="red">Attention:</font> This is to inform you that the port you have opened does not meet the security compliance standard followed by Mphasis Limited. The resource details are attached below.
+    <p><font size="+1">Security Group Details:</font></p>
+    </body>
+    </html>
+    ${prepareMailBody(resourceObject)} 
+    <p><font size="+1">Note:</font></p>  
+    1. Security Group is the firewall of your instance, opening ports unnecessarily can compromise the security.<br>
+    2. Please reach out to CIO Team to make changes to the security group(s), if necessary.
+    <p><font size="+1">Have a great day!</font></p>
+    </body></html>`
+}
+
 function prepareHtml(table, headers) {
     let htmlBody = ``
     headers.forEach((header) => {
@@ -18,8 +36,8 @@ function prepareHtml(table, headers) {
     #customers tr:nth-child(even){background-color: #f2f2f2;}
     #customers tr:hover {background-color: #ddd;}
     #customers th {
-        padding-top: 12px;
-        padding-bottom: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         text-align: left;
         background-color: #4CAF50;
         color: white;
@@ -27,6 +45,8 @@ function prepareHtml(table, headers) {
     </style>
     <body><table id="customers"> ${htmlBody}${table}</table> </body></html>`
 }
+
+
 
 function prepareMailBody(instances) {
     let htmlTable = ``;
@@ -42,6 +62,4 @@ function prepareMailBody(instances) {
 }
 
 
-
-
-exports.prepareMailBody = prepareMailBody;
+exports.securityGroupMailBody = securityGroupMailBody;
