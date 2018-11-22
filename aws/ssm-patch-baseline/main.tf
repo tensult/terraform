@@ -24,7 +24,6 @@ resource "aws_ssm_patch_baseline" "AL2" {
 
   approval_rule {
     approve_after_days = 7
- #   compliance_level   = "HIGH"  <- This is an optional parameter, and may not be relevant for us
 
     patch_filter {
       key    = "PRODUCT"
@@ -59,7 +58,6 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
 
   approval_rule {
     approve_after_days = 7
- #   compliance_level   = "HIGH"  <- This is an optional parameter, and may not be relevant for us
 
     patch_filter {
       key    = "PRODUCT"
@@ -74,6 +72,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
   }
  }
 
+#This is done for CentOS. Depending on OS type, available filters and parameters change
  resource "aws_ssm_patch_baseline" "centos" {
   name             = "patch-baseline-CentOS6"
   description      = "Patch Baseline for CentOS6 Operating System"
@@ -92,7 +91,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
 
   approval_rule {
     approve_after_days = 7
- #   compliance_level   = "HIGH"  <- This is an optional parameter, and may not be relevant for us
+    enable_non_security = true
 
     patch_filter {
       key    = "PRODUCT"
@@ -111,6 +110,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
   }
 
 }
+#This is done for Ubuntu. Depending on OS type, available filters and parameters change
 
 resource "aws_ssm_patch_baseline" "Redhat6" {
   name             = "patch-baseline-Redhat6"
@@ -131,7 +131,6 @@ resource "aws_ssm_patch_baseline" "Redhat6" {
 
   approval_rule {
     approve_after_days = 7
- #   compliance_level   = "HIGH"  <- This is an optional parameter, and may not be relevant for us
 
     patch_filter {
       key    = "PRODUCT"
@@ -150,3 +149,4 @@ resource "aws_ssm_patch_baseline" "Redhat6" {
   }
 
 }
+
