@@ -19,10 +19,10 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
-            "nextStep": "changehostname"
+            "nextStep": "changeHostname"
         },
         {
-            "name": "changehostname",
+            "name": "changeHostname",
             "action": "aws:runCommand",
             "onFailure": "Abort",
             "inputs": {

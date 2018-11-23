@@ -19,10 +19,10 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
-            "nextStep": "changehostname"
+            "nextStep": "changeHostname"
         },
         {
-            "name": "changehostname",
+            "name": "changeHostname",
             "action": "aws:runCommand",
             "onFailure": "Abort",
             "inputs": {
@@ -78,7 +78,7 @@
             }
         },
         {
-            "name": "waitForInstancesToStartAfterdomainjoin",
+            "name": "waitForInstancesToStartAfterDomainJoin",
             "action": "aws:changeInstanceState",
             "timeoutSeconds": 600,
             "onFailure": "Abort",
@@ -89,10 +89,10 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
-            "nextStep": "modifysssd"
+            "nextStep": "modifySSSD"
         },
         {
-            "name": "modifysssd",
+            "name": "modifySSSD",
             "action": "aws:runCommand",
             "onFailure": "Abort",
             "inputs": {
