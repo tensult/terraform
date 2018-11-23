@@ -26,3 +26,8 @@ variable "cron" {
  variable "account_id" {
   description = "AccountID"
 }
+
+variable "iam_policy_arn" {
+  description = "IAM Policy to be used by the maintenance window to execute tasks"
+  default = "arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole"
+}

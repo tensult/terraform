@@ -19,6 +19,10 @@ resource "aws_ssm_maintenance_window_target" "target1" {
   }
 }
 
+resource "aws_iam_service_linked_role" "ssm" {
+  aws_service_name = "ssm.amazonaws.com"
+  description = "Service Linked Role for Maintenance Windows to execute tasks"
+}
 
 resource "aws_ssm_maintenance_window_task" "task" {
   window_id        = "${aws_ssm_maintenance_window.window.id}"
@@ -27,7 +31,7 @@ resource "aws_ssm_maintenance_window_task" "task" {
   task_type        = "RUN_COMMAND"
   task_arn         = "AWS-RunPatchBaseline"
   priority         = 1
-  service_role_arn = "arn:aws:iam::${var.account_id}:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM"
+  service_role_arn = "${aws_iam_service_linked_role.ssm.arn}"
   max_concurrency  = "3"
   max_errors       = "10"
 
