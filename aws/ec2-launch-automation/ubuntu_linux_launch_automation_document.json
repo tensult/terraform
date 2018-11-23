@@ -102,15 +102,15 @@
                     "commands": [
                      "sudo su -\n",
                      "cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf.backup\n",
-                     "echo dyndns_update = true > /etc/sssd/sssd.conf\n",
-                     "echo dyndns_refresh_interval = 43200 > /etc/sssd/sssd.conf\n",
-                     "echo dyndns_update_ptr = true > /etc/sssd/sssd.conf\n",
-                     "echo dyndns_ttl = 3600 > /etc/sssd/sssd.conf\n",
+                     "echo dyndns_update = true >> /etc/sssd/sssd.conf\n",
+                     "echo dyndns_refresh_interval = 43200 >> /etc/sssd/sssd.conf\n",
+                     "echo dyndns_update_ptr = true >> /etc/sssd/sssd.conf\n",
+                     "echo dyndns_ttl = 3600 >> /etc/sssd/sssd.conf\n",
                      "/bin/systemctl restart sssd.service\n",
                      "cp /etc/ssh/sshd_config  /etc/ssh/sshd_config.backup\n",
                      "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                      "/bin/systemctl restart sshd.service\n",
-                     "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' > /etc/sudoers.d/CIOCloudmanagement"
+                     "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
                     ]
                 }
             }
