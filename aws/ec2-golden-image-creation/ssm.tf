@@ -103,6 +103,10 @@ resource "aws_ssm_document" "AWS_Create_Image" {
           "Tags": [
               {
                   "Key": "Name",
+                  "Value": "{{ describeInstance.osType }} {{ global:DATE }}"
+              },
+              {
+                  "Key": "OSVersion",
                   "Value": "{{ describeInstance.osType }} {{ describeInstance.osVersion }}"
               },
               {
