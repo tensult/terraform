@@ -26,7 +26,7 @@ variable "cron" {
 variable "patch_operation"{
 
   description = "Decide the Patch Operation behaviour. Permitted Values are 'Scan' and 'Install'." 
-  default = "Scan"
+  default = "Install"
 }
 
 variable "log_bucket_name" {
