@@ -23,11 +23,12 @@ variable "cron" {
   default = "cron(0 0 10 ? * 7#2)"
  }
 
- variable "account_id" {
-  description = "AccountID"
+variable "patch_operation"{
+
+  description = "Decide the Patch Operation behaviour. Permitted Values are 'Scan' and 'Install'." 
+  default = "Install"
 }
 
-variable "iam_policy_arn" {
-  description = "IAM Policy to be used by the maintenance window to execute tasks"
-  default = "arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole"
+variable "log_bucket_name" {
+  description ="S3 Bucket where Run Command Execution logs are to be stored"
 }

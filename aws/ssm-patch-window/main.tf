@@ -42,6 +42,12 @@ resource "aws_ssm_maintenance_window_task" "task" {
 
   task_parameters {
     name   = "Operation"
-    values = ["Install"]
+    values = ["${var.patch_operation}"]
+  }
+
+  logging_info {
+    s3_bucket_name = "${var.log_bucket_name}"
+    s3_region = "${var.region}"
+    s3_bucket_prefix = "${var.profile}/PatchingLogs"
   }
 }
