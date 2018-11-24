@@ -1,5 +1,3 @@
-
-
 resource "aws_ssm_document" "AWS_Create_Image" {
   name          = "Create_Golden_Images"
   document_type = "Automation"
@@ -13,16 +11,15 @@ resource "aws_ssm_document" "AWS_Create_Image" {
       "type": "String",
       "description": "Golden image server instanceId"
     },
-    "platform": {
-      "type": "String",
-      "description": "Operating system platform",
-      "default": "windows",
-      "allowedValues": ["windows", "linux"]
-    },
     "accountIds": {
       "type": "StringList",
-      "description": "Account Ids to share image (AMI)",
+      "description": "(Optional) Account Ids to share image (AMI)",
       "default": ${jsonencode(var.account_ids)}
+    },
+    "shareImage": {
+      "type": "Boolean",
+      "description": "(Optional) should share AMI with accountIds mentioned",
+      "default": ${length(var.account_ids) > 0}
     }
   },
   "mainSteps": [{
@@ -36,29 +33,76 @@ resource "aws_ssm_document" "AWS_Create_Image" {
           "Values": ["{{instanceId}}"]
         }]
       },
-      "outputs": [{
-        "Name": "osType",
-        "Selector": "$.InstanceInformationList[0].PlatformName",
-        "Type": "String"
-      }, 
-      {
-        "Name": "osVersion",
-        "Selector": "$.InstanceInformationList[0].PlatformVersion",
-        "Type": "String"
-      }
+      "outputs": [
+        {
+          "Name": "osType",
+          "Selector": "$.InstanceInformationList[0].PlatformName",
+          "Type": "String"
+        }, 
+        {
+          "Name": "osVersion",
+          "Selector": "$.InstanceInformationList[0].PlatformVersion",
+          "Type": "String"
+        },
+        {
+          "Name": "platformType",
+          "Selector": "$.InstanceInformationList[0].PlatformType",
+          "Type": "String"
+        }
       ]
     },
     {
       "name": "prepareInstance",
       "action": "aws:branch",
       "inputs": {
-        "Choices": [{
-          "NextStep": "runSysprepForWindows",
-          "Variable": "{{platform}}",
-          "StringEquals": "windows"
-        }],
+        "Choices": [
+          {
+            "NextStep": "prepareWindowsInstance",
+            "Variable": "{{describeInstance.platformType}}",
+            "StringEquals": "Windows"
+          }, 
+          {
+            "NextStep": "prepareLinuxInstance",
+            "Variable": "{{describeInstance.platformType}}",
+            "StringEquals": "Linux"
+          }
+        ],
         "Default": "createImage"
       }
+    },
+    {
+      "name": "prepareWindowsInstance",
+      "action": "aws:runCommand",
+      "onFailure": "step:createImage",
+      "isCritical": false,
+      "inputs": {
+          "DocumentName": "AWS-RunPowerShellScript",
+          "InstanceIds": ["{{instanceId}}"],
+          "Parameters": {
+              "commands": [
+                  "& \"C:\\Program Files\\McAfee\\Agent\\maconfig.exe\" -enforce -noguid\n",
+                  "echo \"Instance is ready now\""
+              ]
+          }
+      },
+      "nextStep": "runSysprepForWindows"
+    },
+    {
+      "name": "prepareLinuxInstance",
+      "action": "aws:runCommand",
+      "onFailure": "step:createImage",
+      "isCritical": false,
+      "inputs": {
+          "DocumentName": "AWS-RunShellScript",
+          "InstanceIds": ["{{instanceId}}"],
+          "Parameters": {
+              "commands": [
+                  "/opt/McAfee/agent/bin/maconfig -enforce -noguid\n",
+                  "echo \"Instance is ready now\""
+              ]
+          }
+      },
+      "nextStep": "createImage"
     },
     {
       "name": "runSysprepForWindows",
@@ -87,7 +131,7 @@ resource "aws_ssm_document" "AWS_Create_Image" {
       "onFailure": "Abort",
       "inputs": {
         "InstanceId": "{{ instanceId }}",
-        "ImageName": "{{ describeInstance.osType }}"
+        "ImageName": "{{ describeInstance.osType }}_{{ describeInstance.osVersion }}_{{global:DATE_TIME}}"
       }
     },
     {
@@ -121,8 +165,23 @@ resource "aws_ssm_document" "AWS_Create_Image" {
         }
     },
     {
+      "name": "shouldShareImage",
+      "action": "aws:branch",
+      "isEnd": true,
+      "inputs": {
+        "Choices": [
+          {
+            "NextStep": "shareImage",
+            "Variable": "{{shareImage}}",
+            "BooleanEquals": true
+          }
+        ]
+      }
+    },
+    {
       "name": "shareImage",
       "action": "aws:executeAwsApi",
+      "isCritical": false,
       "inputs": {
         "Service": "ec2",
         "Api": "ModifyImageAttribute",
