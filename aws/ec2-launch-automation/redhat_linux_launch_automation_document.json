@@ -54,6 +54,14 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
+            "nextStep": "wait2minute"
+        },
+        {
+            "name": "wait2minute",
+            "action": "aws:sleep",
+            "inputs": {
+                "Duration": "PT2M"
+            },
             "nextStep": "joinDomain"
         },
         {
@@ -69,7 +77,10 @@
                         "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                         "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                         "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-                        "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
+                        "for i in {1..5};\n",
+                        "do\n",
+                        "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain && echo \"Domain joined successfully after $i retries\" && break;\n",
+                        "done\n",
                         "sudo shutdown -r 1"
                     ]
                 }
