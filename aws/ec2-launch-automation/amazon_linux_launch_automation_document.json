@@ -37,6 +37,7 @@
                         "if [ -z \"$hostname\" ]; then echo \"hostname tag is not defined so existing\"; exit -1; fi\n",
                         "echo $hostname.$domain > /etc/hostname\n",
                         "echo 127.0.0.1 $hostname.$domain $hostname > /etc/hosts\n",
+                        "echo \"Hostname has changed rebooting\"\n",
                         "reboot"
                     ]
                 }
