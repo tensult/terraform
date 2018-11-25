@@ -25,3 +25,9 @@ variable "notification_emails" {
   type        = "string"
   default     = ""
 }
+
+variable "send_to_admin" {
+  description = "Email to be notified"
+  type        = "string"
+  default     = "yes"
+}
