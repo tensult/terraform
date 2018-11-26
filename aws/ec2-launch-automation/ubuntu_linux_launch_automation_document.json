@@ -35,6 +35,7 @@
                         "if realm list |grep $domain; then echo \"Host has already joined $domain so exiting\"; exit -1; fi;\n",
                         "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
                         "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`hostname`].Value' --output text)\n",
+                        "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)\n",
                         "if [ -z \"$hostname\" ]; then echo \"hostname (case sensitive) tag is not defined so exiting\"; exit -1; fi\n",
                         "echo $hostname.$domain > /etc/hostname\n",
                         "echo 127.0.0.1 $hostname.$domain > /etc/hosts\n",
