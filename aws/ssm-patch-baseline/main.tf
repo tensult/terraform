@@ -1,8 +1,4 @@
-provider "aws" {
-  profile = "${var.profile}"
-  region  = "${var.region}"
 
-}
 
 #This is done for Amazon Linux 2. Depending on OS type, available filters and parameters change
 resource "aws_ssm_patch_baseline" "AL2" {
@@ -61,7 +57,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
 
     patch_filter {
       key    = "PRODUCT"
-      values = ["Ubuntu16.04"]
+      values = ["Ubuntu*"]
     }
 
     patch_filter {
@@ -74,8 +70,8 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
 
 #This is done for CentOS. Depending on OS type, available filters and parameters change
  resource "aws_ssm_patch_baseline" "centos" {
-  name             = "patch-baseline-CentOS6"
-  description      = "Patch Baseline for CentOS6 Operating System"
+  name             = "patch-baseline-CentOS"
+  description      = "Patch Baseline for CentOS Operating System"
   operating_system = "CENTOS"
 
 
@@ -95,7 +91,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
 
     patch_filter {
       key    = "PRODUCT"
-      values = ["CentOS6.5","CentOS6.6","CentOS6.7","CentOS6.8","CentOS6.9"]
+      values = ["CentOS*"]
     }
 
     patch_filter {
@@ -110,11 +106,11 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
   }
 
 }
-#This is done for Ubuntu. Depending on OS type, available filters and parameters change
+#This is done for Redhat. Depending on OS type, available filters and parameters change
 
 resource "aws_ssm_patch_baseline" "Redhat6" {
-  name             = "patch-baseline-Redhat6"
-  description      = "Patch Baseline for Redhat6 Operating System"
+  name             = "patch-baseline-Redhat"
+  description      = "Patch Baseline for Redhat Operating System"
   operating_system = "REDHAT_ENTERPRISE_LINUX"
 
 
@@ -134,7 +130,7 @@ resource "aws_ssm_patch_baseline" "Redhat6" {
 
     patch_filter {
       key    = "PRODUCT"
-      values = ["RedhatEnterpriseLinux6.5","RedhatEnterpriseLinux6.6", "RedhatEnterpriseLinux6.7","RedhatEnterpriseLinux6.8","RedhatEnterpriseLinux6.9"]
+      values = ["RedhatEnterpriseLinux*"]
     }
 
     patch_filter {
@@ -148,5 +144,55 @@ resource "aws_ssm_patch_baseline" "Redhat6" {
     }
   }
 
+}
+
+resource "aws_ssm_maintenance_window" "window" {
+  name     = "Patch-maintenance-window"
+  schedule = "${var.cron}"
+  duration = "${var.duration}"
+  cutoff   = "${var.cutoff_time}"
+}
+
+resource "aws_ssm_maintenance_window_target" "target1" {
+  window_id     = "${aws_ssm_maintenance_window.window.id}"
+  resource_type = "INSTANCE"
+
+  targets {
+    key    = "tag:os_type"
+    values = ["RedHat","CentOS","AmazonLinux2","Ubuntu"]
+  }
+}
+
+resource "aws_iam_service_linked_role" "ssm" {
+  aws_service_name = "ssm.amazonaws.com"
+  description = "Service Linked Role for Maintenance Windows to execute tasks"
+}
+
+resource "aws_ssm_maintenance_window_task" "task" {
+  window_id        = "${aws_ssm_maintenance_window.window.id}"
+  name             = "Run-Patch-Baseline-Document"
+  description      = "Task to Install Patches to Linux Instances"
+  task_type        = "RUN_COMMAND"
+  task_arn         = "AWS-RunPatchBaseline"
+  priority         = 1
+  service_role_arn = "${aws_iam_service_linked_role.ssm.arn}"
+  max_concurrency  = "3"
+  max_errors       = "10"
+
+  targets {
+    key    = "WindowTargetIds"
+    values = ["${aws_ssm_maintenance_window_target.target1.id}"]
+  }
+
+  task_parameters {
+    name   = "Operation"
+    values = ["${var.patch_operation}"]
+  }
+
+  logging_info {
+    s3_bucket_name = "${var.log_bucket_name}"
+    s3_region = "${var.region}"
+    s3_bucket_prefix = "${var.profile}/PatchingLogs"
+  }
 }
 
