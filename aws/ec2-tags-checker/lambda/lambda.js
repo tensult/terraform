@@ -7,15 +7,14 @@ const ses = new AWS.SES({
 
 const ec2 = new AWS.EC2();
 
-const fifteenDaysInMilliSecs = 1296000000 ;
+const fifteenDaysInMilliSecs = 15 * 24 * 60 * 60 * 1000;;
 
 function getEc2Instances(stateNames, tagKey, tagValue) {
     const filters = [];
     if (stateNames && stateNames.length) {
         filters.push({
             Name: 'instance-state-name',
-            Values:
-                stateNames
+            Values: stateNames
         });
     }
     if (tagKey) {
@@ -88,6 +87,13 @@ function collectEc2InstancesToBeExpired(ec2Reservations) {
         });
     }).map((instance) => {
         return utils.getRequiredInstanceInfo(instance);
+    }).sort((first, second) => {
+        if (first.expiry_date < second.expiry_date) {
+            return -1;
+        } else if (first.expiry_date > second.expiry_date) {
+            return 1;
+        }
+        return 0;
     });
 }
 
@@ -105,7 +111,8 @@ function sendNotificationToUsers(emailBody, emailSubject, emails) {
         Message: { /* required */
             Body: { /* required */
                 Html: {
-                    Data: emailBody, /* required */
+                    Data: emailBody,
+                    /* required */
                     Charset: 'utf-8'
                 }
             },
@@ -114,7 +121,8 @@ function sendNotificationToUsers(emailBody, emailSubject, emails) {
                 Charset: 'utf-8'
             }
         },
-        Source: `${process.env.sesEmail}`, /* required */
+        Source: `${process.env.sesEmail}`,
+        /* required */
     }
     return ses.sendEmail(params).promise();
 }
@@ -150,7 +158,7 @@ async function sendNotificationsForExpiryDate(ec2Instances) {
     try {
         // sending notification to admin user to know that instances are going to expire in a week
         let expiringInstances = collectEc2InstancesToBeExpired(ec2Instances.Reservations);
-        if (expiringInstances && expiringInstances.length && process.env.sendToAdmin === 'yes' ) {
+        if (expiringInstances && expiringInstances.length && process.env.sendToAdmin === 'yes') {
             const alertMailBody = utils.expiryInstancesMailBody(expiringInstances);
             const alertMailSubject = "Alert: Ec2 instances are going to expire";
             await sendNotificationToUsers(alertMailBody, alertMailSubject, [process.env.adminEmail]);
