@@ -127,7 +127,24 @@ resource "aws_ssm_document" "redhatlinux" {
                   "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                   "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                   "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-                  "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain\n",
+                  "for i in 1 2 3 4 5;\n",
+                  "do\n",
+                  "echo $password | sudo realm join --membership-software=adcli -U $username --computer-ou=$ouPath $domain && echo \"Host has joined domain successfully after $i retries\" && break;\n",
+                  "done\n",
+                  "if ! sudo realm list |grep $domain; then echo \"Host has not joined $domain so exiting\"; exit -1; fi;\n",
+                  "sudo su -\n",
+                  "cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf.backup\n",
+                  "echo dyndns_update = true >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_refresh_interval = 43200 >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_update_ptr = true >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_ttl = 3600 >> /etc/sssd/sssd.conf\n",
+                  "echo Updated sssd.conf, now restarting sssd service\n",
+                  "/bin/systemctl restart sssd.service\n",
+                  "cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup\n",
+                  "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+                  "echo Updated sshd_config, now restarting sshd service\n",
+                  "/bin/systemctl restart sshd.service\n",
+                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
                   "sudo shutdown -r 1"
                ]
             }
@@ -155,7 +172,24 @@ resource "aws_ssm_document" "linux" {
                   "ouPath=$(aws ssm get-parameters --names /domain/ou_path --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                   "username=$(aws ssm get-parameters --names /domain/username --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
                   "password=$(aws ssm get-parameters --names /domain/password --with-decryption --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-                  "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain\n",
+                  "for i in 1 2 3 4 5;\n",
+                  "do\n",
+                  "echo $password | sudo realm join --membership-software=samba -U $username --computer-ou=$ouPath $domain && echo \"Host has joined domain successfully after $i retries\" && break;\n",
+                  "done\n",
+                  "if ! sudo realm list |grep $domain; then echo \"Host has not joined $domain so exiting\"; exit -1; fi;\n",
+                  "sudo su -\n",
+                  "cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf.backup\n",
+                  "echo dyndns_update = true >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_refresh_interval = 43200 >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_update_ptr = true >> /etc/sssd/sssd.conf\n",
+                  "echo dyndns_ttl = 3600 >> /etc/sssd/sssd.conf\n",
+                  "echo Updated sssd.conf, now restarting sssd service\n",
+                  "/bin/systemctl restart sssd.service\n",
+                  "cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup\n",
+                  "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
+                  "echo Updated sshd_config, now restarting sshd service\n",
+                  "/bin/systemctl restart sshd.service\n",
+                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
                   "sudo shutdown -r 1"
                ]
             }
@@ -172,7 +206,7 @@ resource "aws_ssm_document" "Hostname_Windows" {
   content = <<DOC
   {
       "schemaVersion":"2.0",
-      "description":"Run a Shell script to securely Changing the Hostname for Windows instance",
+      "description":"Run a Shell script to securely Changing the hostname for Windows instance",
       "mainSteps":[
          {
             "action":"aws:runPowerShellScript",
@@ -181,7 +215,7 @@ resource "aws_ssm_document" "Hostname_Windows" {
                "runCommand":[
                "$currenthostname = hostname\n",
                "$instanceId = ((Invoke-WebRequest -Uri http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content)\n",
-               "$newhostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
+               "$newhostname = (aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`hostname`].Value' --output text)\n",
                "Rename-computer –computername \"$currenthostname\" –newname \"$newhostname\"\n",
                "Restart-Computer -Force"
                ]
@@ -199,7 +233,7 @@ resource "aws_ssm_document" "Hostname_Linux" {
   content = <<DOC
   {
       "schemaVersion":"2.0",
-      "description":"Run a Shell script to securely Changing the Hostname for Linux instance",
+      "description":"Run a Shell script to securely Changing the hostname for Linux instance",
       "mainSteps":[
          {
             "action":"aws:runShellScript",
@@ -207,11 +241,14 @@ resource "aws_ssm_document" "Hostname_Linux" {
             "inputs":{
                "runCommand":[
                   "sudo su -",
-                  "instanceid=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
                   "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-                  "hostname=$(aws ec2 describe-instances --instance-id $instanceid --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
-                  "echo $hostname > /etc/hostname\n",
+                  "if realm list |grep $domain; then echo \"Host has already joined $domain so exiting\"; exit -1; fi;\n",
+                  "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+                  "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`hostname`].Value' --output text)\n",
+                  "if [ -z \"$hostname\" ]; then echo \"hostname (case sensitive) tag is not defined so exiting\"; exit -1; fi\n",
+                  "echo $hostname.$domain > /etc/hostname\n",
                   "echo 127.0.0.1 $hostname.$domain $hostname > /etc/hosts\n",
+                  "echo \"Hostname has changed and rebooting now\"\n",
                   "reboot"
                ]
             }
@@ -228,7 +265,7 @@ resource "aws_ssm_document" "Hostname_Ubuntu" {
   content = <<DOC
   {
    "schemaVersion":"2.0",
-   "description":"Run a Shell script to securely Changing the Hostname for Ubuntu instance",
+   "description":"Run a Shell script to securely Changing the hostname for Ubuntu instance",
    "mainSteps":[
       {
          "action":"aws:runShellScript",
@@ -236,13 +273,16 @@ resource "aws_ssm_document" "Hostname_Ubuntu" {
          "inputs":{
             "runCommand":[
                "sudo su -",
-               "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
                "domain=$(aws ssm get-parameters --names /domain/name --region ap-south-1 --query 'Parameters[0].Value' --output text)\n",
-               "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`HostName`].Value' --output text)\n",
-               "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)",
-               "echo $hostname > /etc/hostname\n",
+               "if realm list |grep $domain; then echo \"Host has already joined $domain so exiting\"; exit -1; fi;\n",
+               "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+               "hostname=$(aws ec2 describe-instances --instance-id $instanceId --region ap-south-1 --query 'Reservations[0].Instances[0].Tags[?Key==`hostname`].Value' --output text)\n",
+               "ipv4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)\n",
+               "if [ -z \"$hostname\" ]; then echo \"hostname (case sensitive) tag is not defined so exiting\"; exit -1; fi\n",
+               "echo $hostname.$domain > /etc/hostname\n",
                "echo 127.0.0.1 $hostname.$domain > /etc/hosts\n",
                "echo \"$ipv4 $hostname\" >> /etc/hosts\n",
+               "echo \"Hostname has changed and rebooting now\"\n",
                "reboot"
             ]
          }
