@@ -55,10 +55,6 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
   approval_rule {
     approve_after_days = 7
 
-    patch_filter {
-      key    = "PRODUCT"
-      values = ["Ubuntu*"]
-    }
 
     patch_filter {
       key    = "PRIORITY"
@@ -89,10 +85,7 @@ resource "aws_ssm_patch_baseline" "Ubuntu16" {
     approve_after_days = 7
     enable_non_security = true
 
-    patch_filter {
-      key    = "PRODUCT"
-      values = ["CentOS*"]
-    }
+
 
     patch_filter {
       key    = "CLASSIFICATION"
@@ -128,11 +121,7 @@ resource "aws_ssm_patch_baseline" "Redhat6" {
   approval_rule {
     approve_after_days = 7
 
-    patch_filter {
-      key    = "PRODUCT"
-      values = ["RedhatEnterpriseLinux*"]
-    }
-
+    
     patch_filter {
       key    = "CLASSIFICATION"
       values = ["Security"]
