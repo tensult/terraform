@@ -144,7 +144,7 @@ resource "aws_ssm_document" "redhatlinux" {
                   "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                   "echo Updated sshd_config, now restarting sshd service\n",
                   "/bin/systemctl restart sshd.service\n",
-                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
+                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement\n",
                   "sudo shutdown -r 1"
                ]
             }
@@ -189,7 +189,7 @@ resource "aws_ssm_document" "linux" {
                   "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                   "echo Updated sshd_config, now restarting sshd service\n",
                   "/bin/systemctl restart sshd.service\n",
-                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
+                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement\n",
                   "sudo shutdown -r 1"
                ]
             }
