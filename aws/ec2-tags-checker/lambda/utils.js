@@ -1,3 +1,4 @@
+const expiringSoonTime = 7 * 24 * 60 * 60 * 1000;
 const defaultTags = {
     'name': 'string',
     'hostname': 'string',
@@ -16,7 +17,7 @@ const defaultTags = {
     'snapshot': "boolean"
 }
 
-const missingTagsMailBody = (instancesOfMissingTags)=>{
+const missingTagsMailBody = (instancesOfMissingTags) => {
     return `<!DOCTYPE html>
     <html>
     <body>
@@ -35,7 +36,7 @@ const missingTagsMailBody = (instancesOfMissingTags)=>{
     </body></html>`
 }
 
-const expiryInstancesMailBody = (groupedInstancesByOwner)=>{
+const expiryInstancesMailBody = (groupedInstancesByOwner) => {
     return `<!DOCTYPE html>
     <html>
     <body>
@@ -53,7 +54,7 @@ const expiryInstancesMailBody = (groupedInstancesByOwner)=>{
     </body></html>`
 }
 
-const expiredInstancesMailBody = (groupedInstancesByOwner)=>{
+const expiredInstancesMailBody = (groupedInstancesByOwner) => {
     return `<!DOCTYPE html>
     <html>
     <body>
@@ -78,46 +79,59 @@ const emailRegExp = new RegExp(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"
 
 
 
-function prepareHtml(table, headers) {
-    let htmlBody = ``
-    headers.forEach((header) => {
-        htmlBody = header ? htmlBody + `<th>${header}</th>` : htmlBody;
+function prepareHtml(tableBody, headers) {
+    const headerElements = headers.map((header) => {
+        return `<th>${header}</th>`
     })
-    htmlBody = "<tr>" + htmlBody + "</tr>"
-    return `<!DOCTYPE html><html><style>
-    #customers {
-        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-    }
-    #customers td, #customers th {
-        border: 1px solid #ddd;
-        padding: 8px;
-    }
-    #customers tr:nth-child(even){background-color: #f2f2f2;}
-    #customers tr:hover {background-color: #ddd;}
-    #customers th {
-        padding-top: 8px;
-        padding-bottom: 8px;
-        text-align: left;
-        background-color: #4CAF50;
-        color: white;
-    }
-    </style>
-    <body><table id="customers"> ${htmlBody}${table}</table> </body></html>`
+    const tableHeader = "<tr>" + headerElements.join("\n") + "</tr>"
+    return `<!DOCTYPE html>
+    <html>
+        <style>
+            #customers {
+                font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+            #customers td, #customers th {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            #customers tr:nth-child(even){background-color: #f2f2f2;}
+            #customers tr:hover {background-color: #ddd;}
+            #customers th {
+                padding-top: 8px;
+                padding-bottom: 8px;
+                text-align: left;
+                background-color: #4CAF50;
+                color: white;
+            }
+            .red {
+                color: red;
+            }
+        </style>
+        <body>
+            <table id="customers"> 
+                ${tableHeader} 
+                ${tableBody}
+            </table> 
+        </body>
+    </html>`
 }
 
 function prepareMailBody(instances) {
-    let htmlTable = ``;
     let headers = Object.keys(instances[0]);
-    instances.forEach((instance) => {
-        const instanceElements = Object.keys(instance);
-        instanceElements.forEach((element) => {
-            htmlTable = instance[element] ? htmlTable + `<td>${instance[element]}</td>` : htmlTable + `<td>Not Mentioned</td>`;
-        })
-        htmlTable = '<tr>' + htmlTable + '</tr>';
+    const rowElements = instances.map((instance) => {
+        const columnElements = Object.keys(instance).map((elementKey) => {
+            const elementOutput = instance[elementKey] ? instance[elementKey] : 'Not Mentioned';
+            return `<td>${elementOutput}</td>`;
+        });
+        let fontClass = "normal";
+        if (new Date(instance.expiry_date).getTime() < Date.now() + expiringSoonTime) {
+            fontClass = "red";
+        }
+        return `<tr class="${fontClass}">` + columnElements.join('\n') + '</tr>';
     });
-    return prepareHtml(htmlTable, headers);
+    return prepareHtml(rowElements.join("\n"), headers);
 }
 
 function groupInstancesByOwners(instances) {
@@ -157,54 +171,41 @@ function convertKeysToLowercase(tags) {
     }, {})
 }
 
-function convertToLoweCase(string){
-   return string.toLocaleLowerCase()
+function convertToLoweCase(string) {
+    return string.toLocaleLowerCase()
 }
 
 function getRequiredInstanceInfo(instance) {
-    let instanceObject = {
-        instanceId: undefined,
+    const instanceObject = {
+        account_name: undefined,
+        instance_id: undefined,
         name: undefined,
-        primaryOwner: undefined,
-        secondaryOwner: undefined,
-        expiryDate: undefined,
-        hostName: undefined,
-        changeNo: undefined,
-        projectCode: undefined,
-        ipAddress: undefined
+        primary_owner: undefined,
+        secondary_owner: undefined,
+        expiry_date: undefined,
+        hostname: undefined,
+        change_no: undefined,
+        project_code: undefined,
+        ip_address: undefined
     }
+    if (process.env.accountName) {
+        instanceObject.account_name = process.env.accountName;
+    }
+
+    if (instance.InstanceId) {
+        instanceObject.instance_id = instance.InstanceId;
+    }
+
+    if (instance.PrivateIpAddress) {
+        instanceObject.ip_address = instance.PrivateIpAddress;
+    }
+
     instance.Tags.forEach((tag) => {
-        if(process.env.accountName){
-            instanceObject.accountName = process.env.accountName   
+        const lowerCaseTagKey = convertToLoweCase(tag.Key);
+        if (tag.Value && instanceObject.hasOwnProperty(lowerCaseTagKey)) {
+            instanceObject[lowerCaseTagKey] = tag.Value;
         }
-        if (instance.InstanceId) {
-            instanceObject.instanceId = instance.InstanceId
-        }
-        if (convertToLoweCase(tag.Key) === "name" && tag.Value) {
-            instanceObject.name = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "primary_owner" && tag.Value) {
-            instanceObject.primaryOwner = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "secondary_owner" && tag.Value) {
-            instanceObject.secondaryOwner = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "expiry_date" && tag.Value) {
-            instanceObject.expiryDate = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "hostname" && tag.Value) {
-            instanceObject.hostName = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "change_no" && tag.Value) {
-            instanceObject.changeNo = tag.Value
-        }
-        if (convertToLoweCase(tag.Key) === "project_code" && tag.Value) {
-            instanceObject.projectCode = tag.Value
-        }
-        if (instance.PrivateIpAddress) {
-            instanceObject.ipAddress = instance.PrivateIpAddress
-        }
-    })
+    });
     return instanceObject;
 }
 
