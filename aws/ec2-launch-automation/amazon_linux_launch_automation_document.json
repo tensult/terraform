@@ -57,6 +57,14 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
+            "nextStep": "wait2minute"
+        },
+        {
+            "name": "wait2minute",
+            "action": "aws:sleep",
+            "inputs": {
+                "Duration": "PT2M"
+            },
             "nextStep": "joinDomain"
         },
         {
