@@ -1,0 +1,164 @@
+{
+    "schemaVersion": "0.3",
+    "description": "EC2 launch automation for any type of OS",
+    "parameters": {
+        "instanceId": {
+            "type": "String",
+            "description": "Golden image server instanceId"
+        }
+    },
+    "mainSteps": [{
+            "name": "describeInstance",
+            "action": "aws:executeAwsApi",
+            "onFailure": "Abort",
+            "inputs": {
+                "Service": "ssm",
+                "Api": "DescribeInstanceInformation",
+                "Filters": [{
+                    "Key": "InstanceIds",
+                    "Values": ["{{instanceId}}"]
+                }]
+            },
+            "outputs": [{
+                "Name": "osType",
+                "Selector": "$.InstanceInformationList[0].PlatformName",
+                "Type": "String"
+            }],
+            "nextStep": "chooseAutomationDocument"
+        },
+        {
+            "name": "chooseAutomationDocument",
+            "action": "aws:branch",
+            "inputs": {
+                "Choices": [{
+                        "NextStep": "executeForWindows2012",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Windows Server 2012"
+                    },
+                    {
+                        "NextStep": "executeForWindows2016",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Windows Server 2016"
+                    },
+                    {
+                        "NextStep": "executeForRedHat",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Red Hat"
+                    },
+                    {
+                        "NextStep": "executeForUbuntu",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Ubuntu"
+                    },
+                    {
+                        "NextStep": "executeForCentOS",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "CentOS"
+                    },
+                    {
+                        "NextStep": "executeForAmazonLinux",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Amazon Linux"
+                    }
+                ],
+                "Default": "executeForAmazonLinux"
+            }
+        },
+        {
+            "name": "executeForAmazonLinux",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_AmazonLinux",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "executeForCentOS",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_CentOSLinux",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "executeForRedHat",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_RedHatLinux",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "executeForUbuntu",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_UbuntuLinux",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "executeForWindows2012",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_Windows2012",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "executeForWindows2016",
+            "action": "aws:executeAutomation",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Launch_Automation_for_Windows2016",
+                "RuntimeParameters": {
+                    "instanceIds": [
+                        "{{instanceId}}"
+                    ]
+                }
+            }
+        }
+    ]
+}
