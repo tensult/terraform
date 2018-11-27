@@ -24,14 +24,13 @@ const missingTagsMailBody = (instancesOfMissingTags) => {
     <p><font size="+2"></font>Dear User,</font></p>
     <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created does not meet the tagging - policies as per the standard followed by Mphasis Limited. Below are the mandatory tags that needs to be added during a fresh deployment.
     <p><font size="+1">Non-compliant servers:</font></p>
-    </body>
-    </html>
     ${prepareMailBody(instancesOfMissingTags)} 
     <p><font size="+1">Mandatory Tags List:</font></p>
     ${prepareMailBody([defaultTags])}
     <p><font size="+1">Note:</font></p>  
     1. Please make sure to add all the tags mentioned above for future deployments.<br>
     2. Please do not delete any existing tags from the machines you have access.
+    3. Please mention date format as "yyyy-mm-dd" to the expiray_date and provision_date tags.
     <p><font size="+1">Have a great day!</font></p>
     </body></html>`
 }
@@ -43,8 +42,6 @@ const expiryInstancesMailBody = (groupedInstancesByOwner) => {
     <p><font size="+2"></font>Dear User,</font></p>
     <font size="+3" color="red">Attention:</font> This is to inform you that the EC2 resources you have created is expiring with in 15 days. If you want to continue using the instance please make sure to change the value in “expiry_date” tag. Instance details are attached below.
     <p><font size="+1">Server Details:</font></p>
-    </body>
-    </html>
     ${prepareMailBody(groupedInstancesByOwner)} 
     <p><font size="+1">Note:</font></p>  
     1. Expired instances will be automatically stopped.<br>
@@ -61,8 +58,6 @@ const expiredInstancesMailBody = (groupedInstancesByOwner) => {
     <p><font size="+2"></font>Dear User,</font></p>
     <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created has expired. As a best practice instance is stopped to save the cost. The resource details is attached below.
     <p><font size="+1">Server Details:</font></p>
-    </body>
-    </html>
     ${prepareMailBody(groupedInstancesByOwner)} 
     <p><font size="+1">Note:</font></p>  
     1. The instance is in stopped state which will still incur the cost of storage.<br>
