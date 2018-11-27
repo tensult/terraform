@@ -29,7 +29,7 @@ const missingTagsMailBody = (instancesOfMissingTags) => {
     ${prepareMailBody([defaultTags])}
     <p><font size="+1">Note:</font></p>  
     1. Please make sure to add all the tags mentioned above for future deployments.<br>
-    2. Please do not delete any existing tags from the machines you have access.
+    2. Please do not delete any existing tags from the machines you have access.<br>
     3. Please mention date format as "yyyy-mm-dd" to the expiray_date and provision_date tags.
     <p><font size="+1">Have a great day!</font></p>
     </body></html>`
