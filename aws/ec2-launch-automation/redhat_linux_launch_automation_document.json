@@ -22,6 +22,27 @@
             "nextStep": "changeHostname"
         },
         {
+            "name": "installdependencies",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "sudo su -\n",
+                        "yum update -y\n",
+                        "curl -O https://bootstrap.pypa.io/get-pip.py\n",
+                        "python get-pip.py\n",
+                        "pip install awscli\n",
+                        "sudo yum install sssd realmd oddjob oddjob-mkhomedir adcli krb5-workstation openldap-clients policycoreutils-python -y\n",
+                        "yum install epel-release -y\n"
+                    ]
+                }
+            },
+            "nextStep": "changeHostname"
+        },
+        {
             "name": "changeHostname",
             "action": "aws:runCommand",
             "onFailure": "Abort",
