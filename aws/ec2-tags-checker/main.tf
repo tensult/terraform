@@ -90,7 +90,7 @@ resource "aws_cloudwatch_event_rule" "daily_check_ec2" {
 
 resource "aws_cloudwatch_event_target" "lambda_trigger" {
   rule      = "${aws_cloudwatch_event_rule.daily_check_ec2.name}"
-  target_id = "TriggerLambda"
+  target_id = "${aws_lambda_function.lambda_function.function_name}"
   arn       = "${aws_lambda_function.lambda_function.arn}"
 }
 

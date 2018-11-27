@@ -1,8 +1,8 @@
-
 provider "aws" {
   profile = "${var.profile}"
   region  = "${var.region}"
 }
+
 resource "aws_iam_role" "lambda_role" {
   name = "EC2-Tag-Checker-Lambda"
 
@@ -47,13 +47,13 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "${aws_iam_policy.lambda_policy.arn}"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "${aws_iam_policy.lambda_policy.arn}"
 }
 
 data "archive_file" "lambda_code" {
@@ -73,10 +73,10 @@ resource "aws_lambda_function" "lambda_function" {
 
   environment {
     variables = {
-      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}",
-      adminEmail = "${var.admin_email}"
-      sesEmail = "${var.ses_email}"
-      accountName = "${var.account_name}"
+      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
+      adminEmail         = "${var.admin_email}"
+      sesEmail           = "${var.ses_email}"
+      accountName        = "${var.account_name}"
     }
   }
 }
@@ -90,13 +90,13 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
 }
 
 resource "aws_cloudwatch_event_rule" "daily_check_ec2" {
-  name        = "Daily-Check-EC2-instance-tags"
-  description = "Checks the tags of the EC2 instances and takes action based on expiry"
+  name                = "Daily-Check-EC2-instance-tags"
+  description         = "Checks the tags of the EC2 instances and takes action based on expiry"
   schedule_expression = "cron(0 0 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda_trigger" {
   rule      = "${aws_cloudwatch_event_rule.daily_check_ec2.name}"
-  target_id = "TriggerLambda"
+  target_id = "${aws_lambda_function.lambda_function.function_name}"
   arn       = "${aws_lambda_function.lambda_function.arn}"
 }
