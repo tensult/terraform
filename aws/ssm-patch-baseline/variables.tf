@@ -21,7 +21,8 @@ variable "cron" {
   description = "Cron expression for deciding window scheduling"
   type = "string"
   #The default configured below is cron for running every 2nd Saturday of the month at 10:00 AM
-  default = "cron(0 0 10 ? * 7#2)"
+  #Please input cron expression in UTC timezone
+  default = "cron(0 30 4 ? * 7#2)"
  }
 
 variable "patch_operation"{
