@@ -78,7 +78,7 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
-            "nextStep": "wait2minute"
+            "nextStep": "joinDomain"
         },
         {
             "name": "joinDomain",
