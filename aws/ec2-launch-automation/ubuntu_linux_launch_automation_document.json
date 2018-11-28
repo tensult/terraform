@@ -129,6 +129,7 @@
                 "Parameters": {
                     "commands": [
                         "sudo su -\n",
+                        "domain=`realm list|head -1`\n",
                         "cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf.backup\n",
                         "echo dyndns_update = true >> /etc/sssd/sssd.conf\n",
                         "echo dyndns_refresh_interval = 43200 >> /etc/sssd/sssd.conf\n",
@@ -140,7 +141,7 @@
                         "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                         "echo Updated sshd_config, now restarting sshd service\n",
                         "/bin/systemctl restart sshd.service\n",
-                        "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement"
+                        "echo \"${sudoers}@$domain ALL=(ALL) ALL\" >> /etc/sudoers.d/${sudoers}"
                     ]
                 }
             }

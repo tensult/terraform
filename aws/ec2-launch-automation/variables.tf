@@ -2,6 +2,7 @@ variable "profile" {
   description = "AWS Profile"
   default     = "default"
 }
+
 variable "region" {
   description = "AWS region"
   default     = "ap-south-1"
@@ -21,13 +22,13 @@ variable "domain_ou_path" {
 
 variable "domain_dns_ips" {
   description = "Domain DNS IPs"
-  type = "list"
+  type        = "list"
 }
 
 variable "amazon_dns" {
   description = "Amazon Provided DNS"
-  default = ["AmazonProvidedDNS"],
-  type = "list"
+  default     = ["AmazonProvidedDNS"]
+  type        = "list"
 }
 
 variable "domain_username" {
@@ -36,4 +37,8 @@ variable "domain_username" {
 
 variable "domain_password" {
   description = "Domain password"
+}
+
+variable "sudoers" {
+  description = "sudoers for linux instances"
 }
