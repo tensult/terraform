@@ -36,7 +36,6 @@
                         "python get-pip.py\n",
                         "pip install awscli\n",
                         "sudo yum install sssd realmd oddjob oddjob-mkhomedir adcli krb5-workstation openldap-clients policycoreutils-python -y\n",
-                        "yum install epel-release -y\n",
                         "echo Packages are installed"
                     ]
                 }
