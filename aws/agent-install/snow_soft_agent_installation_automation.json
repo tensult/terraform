@@ -1,0 +1,140 @@
+{
+    "schemaVersion": "0.3",
+    "description": "Snowsoft agent installation automation for any OS",
+    "parameters": {
+        "InstanceId": {
+            "type": "String",
+            "description": "EC2 Server InstanceId"
+        }
+    },
+    "mainSteps": [{
+            "name": "describeInstance",
+            "action": "aws:executeAwsApi",
+            "onFailure": "Abort",
+            "inputs": {
+                "Service": "ssm",
+                "Api": "DescribeInstanceInformation",
+                "Filters": [{
+                    "Key": "InstanceIds",
+                    "Values": ["{{InstanceId}}"]
+                }]
+            },
+            "outputs": [{
+                "Name": "osType",
+                "Selector": "$.InstanceInformationList[0].PlatformName",
+                "Type": "String"
+            }],
+            "nextStep": "chooseDocument"
+        },
+        {
+            "name": "chooseDocument",
+            "action": "aws:branch",
+            "inputs": {
+                "Choices": [{
+                        "NextStep": "installForWindows2012",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Windows Server 2012"
+                    },
+                    {
+                        "NextStep": "installForWindows2016",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Windows Server 2016"
+                    },
+                    {
+                        "NextStep": "installForRedHat",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Red Hat"
+                    },
+                    {
+                        "NextStep": "installForUbuntu",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Ubuntu"
+                    },
+                    {
+                        "NextStep": "installForCentOS",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "CentOS"
+                    },
+                    {
+                        "NextStep": "installForAmazonLinux",
+                        "Variable": "{{describeInstance.osType}}",
+                        "Contains": "Amazon Linux"
+                    }
+                ],
+                "Default": "installForAmazonLinux"
+            }
+        },
+        {
+            "name": "installForAmazonLinux",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_AmzLinux",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        },
+        {
+            "name": "installForCentOS",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_CentOS",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        },
+        {
+            "name": "installForRedHat",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_RedHat",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        },
+        {
+            "name": "installForUbuntu",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_Ubuntu",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        },
+        {
+            "name": "installForWindows2012",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_Windows",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        },
+        {
+            "name": "installForWindows2012",
+            "action": "aws:runCommand",
+            "maxAttempts": 3,
+            "timeoutSeconds": 3600,
+            "isEnd": true,
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Snow_Agent_Windows",
+                "InstanceIds": ["{{InstanceId}}"]
+            }
+        }
+    ]
+}
