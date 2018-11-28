@@ -24,7 +24,7 @@
         {
             "name": "installdependencies",
             "action": "aws:runCommand",
-            "onFailure": "Abort",
+            "onFailure": "Continue",
             "inputs": {
                 "DocumentName": "AWS-RunShellScript",
                 "InstanceIds": ["{{instanceIds}}"],
@@ -36,7 +36,8 @@
                         "python get-pip.py\n",
                         "pip install awscli\n",
                         "apt-get install sssd realmd krb5-user packagekit oddjob oddjob-mkhomedir samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python -y\n",
-                        "yum install epel-release -y\n"
+                        "yum install epel-release -y\n",
+                        "echo Packages are installed"
                     ]
                 }
             },

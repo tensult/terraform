@@ -28,7 +28,7 @@
             "inputs": {
                 "DocumentName": "Install_AWSCLI_windows",
                 "InstanceIds": ["{{instanceIds}}"]
-              },
+            },
             "nextStep": "changeHostname"
         },
         {
