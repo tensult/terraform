@@ -24,7 +24,7 @@
         {
             "name": "installAWSCLI",
             "action": "aws:runCommand",
-            "onFailure": "Abort",
+            "onFailure": "Continue",
             "inputs": {
                 "DocumentName": "Install_AWSCLI_windows",
                 "InstanceIds": ["{{instanceIds}}"]
