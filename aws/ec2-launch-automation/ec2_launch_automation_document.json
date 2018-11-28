@@ -2,9 +2,9 @@
     "schemaVersion": "0.3",
     "description": "EC2 launch automation for any type of OS",
     "parameters": {
-        "instanceId": {
+        "InstanceId": {
             "type": "String",
-            "description": "Golden image server instanceId"
+            "description": "Golden image server InstanceId"
         }
     },
     "mainSteps": [{
@@ -16,7 +16,7 @@
                 "Api": "DescribeInstanceInformation",
                 "Filters": [{
                     "Key": "InstanceIds",
-                    "Values": ["{{instanceId}}"]
+                    "Values": ["{{InstanceId}}"]
                 }]
             },
             "outputs": [{
@@ -75,7 +75,7 @@
                 "DocumentName": "Launch_Automation_for_AmazonLinux",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }
@@ -91,7 +91,7 @@
                 "DocumentName": "Launch_Automation_for_CentOSLinux",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }
@@ -107,7 +107,7 @@
                 "DocumentName": "Launch_Automation_for_RedHatLinux",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }
@@ -123,7 +123,7 @@
                 "DocumentName": "Launch_Automation_for_UbuntuLinux",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }
@@ -139,7 +139,7 @@
                 "DocumentName": "Launch_Automation_for_Windows2012",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }
@@ -155,7 +155,7 @@
                 "DocumentName": "Launch_Automation_for_Windows2016",
                 "RuntimeParameters": {
                     "instanceIds": [
-                        "{{instanceId}}"
+                        "{{InstanceId}}"
                     ]
                 }
             }

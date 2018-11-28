@@ -19,6 +19,16 @@
                 "CheckStateOnly": true,
                 "DesiredState": "running"
             },
+            "nextStep": "installAWSCLI"
+        },
+        {
+            "name": "installAWSCLI",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "inputs": {
+                "DocumentName": "Install_AWSCLI_windows",
+                "InstanceIds": ["{{instanceIds}}"]
+              },
             "nextStep": "changeHostname"
         },
         {
