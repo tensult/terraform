@@ -125,7 +125,7 @@
             }
         },
         {
-            "name": "installForWindows2012",
+            "name": "installForWindows2016",
             "action": "aws:runCommand",
             "maxAttempts": 3,
             "timeoutSeconds": 3600,
