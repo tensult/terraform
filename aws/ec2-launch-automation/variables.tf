@@ -40,5 +40,5 @@ variable "domain_password" {
 }
 
 variable "sudoers" {
-  description = "sudoers for linux instances"
+  description = "sudoers group for linux instances"
 }
