@@ -1,6 +1,6 @@
 #Create Cross Account Role
 resource "aws_iam_role" "cross-acc" {
-  name = "Tensult_Admin"
+  name = "Admin_${var.profile}"
 
   assume_role_policy = <<EOF
 {
