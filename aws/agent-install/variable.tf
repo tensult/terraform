@@ -46,3 +46,12 @@ variable "url_snow_agent_windows" {
 variable "url_scom_agent_windows" {
   description = "url_scom_agent_windows"
 }
+
+variable "url_powershell_6_windows" {
+  description = "url_powershell_6_windows"
+}
+
+variable "url_mcafee_windows" {
+  description = "url_mcafee_windows"
+}
+
