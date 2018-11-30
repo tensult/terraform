@@ -7,7 +7,7 @@ variable "region" {
   default     = "ap-south-1"
 }
 
-variable "instace_ids" {
+variable "instance_ids" {
   description = "EC2 instance Ids"
   type = "list"
 }
