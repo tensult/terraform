@@ -1,19 +1,18 @@
-#Define Policy
-resource "aws_iam_policy" "policy" {
-  name        = "test_policy"
-  path        = "/"
-  description = "My test policy"
+#Create Cross Account Role
+resource "aws_iam_role" "cross-acc" {
+  name = "Tensult_Admin"
 
-  policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": [
-        "ec2:Describe*"
-      ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.requester_account_id}:root"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {}
     }
   ]
 }
@@ -22,6 +21,6 @@ EOF
 
 #Attach policy
 resource "aws_iam_role_policy_attachment" "test-attach" {
-    role       = "${aws_iam_role.cross-account.name}"
-    policy_arn = "${aws_iam_policy.policy.arn}"
+    role       = "${aws_iam_role.cross-acc.name}"
+    policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
