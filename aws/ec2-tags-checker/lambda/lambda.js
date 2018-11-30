@@ -210,7 +210,9 @@ exports.handler = async (event) => {
         }
         await sendNotificationsForMissingTags(ec2Instances);
         await sendNotificationsForExpiryDate(ec2Instances);
-        await stopInstancesByExpiryDate(ec2Instances);
+        if(process.env.stopInstances && process.env.stopInstances === 'yes'){
+            await stopInstancesByExpiryDate(ec2Instances);
+        }
         return;
     } catch (err) {
         throw err;

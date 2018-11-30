@@ -78,6 +78,7 @@ resource "aws_lambda_function" "lambda_function" {
       sesEmail = "${var.ses_email}"
       accountName = "${var.account_name}"
       sendToAdmin = "${var.send_to_admin}"
+      stopInstances = "${var.stop_instances}"
     }
   }
 }
