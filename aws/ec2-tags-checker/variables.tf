@@ -31,3 +31,10 @@ variable "send_to_admin" {
   type        = "string"
   default     = "yes"
 }
+
+variable "stop_instances" {
+  description = "Instances to be stopped"
+  type        = "string"
+  default     = "yes"  
+}
+

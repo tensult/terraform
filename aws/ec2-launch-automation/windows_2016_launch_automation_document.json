@@ -29,6 +29,14 @@
                 "DocumentName": "Install_AWSCLI_windows",
                 "InstanceIds": ["{{instanceIds}}"]
               },
+            "nextStep": "wait1minute"
+        },
+        {
+            "name": "wait1minute",
+            "action": "aws:sleep",
+            "inputs": {
+                "Duration": "PT1M"
+            },
             "nextStep": "changeHostname"
         },
         {
