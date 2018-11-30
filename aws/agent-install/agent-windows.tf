@@ -15,6 +15,15 @@ resource "aws_ssm_document" "windows_awscli" {
               "action": "Install",
               "source": "https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi"
             }
+         },
+         {
+            "action":"aws:runPowerShellScript",
+            "name": "waitForAWSCLI",
+            "inputs":{
+               "runCommand":[
+                  "while (!(Get-Command \"aws\" -errorAction SilentlyContinue)){ Wait-Event -Timeout 10}"
+               ]
+            }
          }
       ]
    }
