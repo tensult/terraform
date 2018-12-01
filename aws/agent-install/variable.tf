@@ -55,3 +55,8 @@ variable "url_mcafee_windows" {
   description = "url_mcafee_windows"
 }
 
+variable "url_awscli_windows" {
+  description = "url_awscli_windows"
+}
+
+
