@@ -13,7 +13,39 @@ resource "aws_ssm_document" "windows_awscli" {
            "inputs": {
               "parameters": "/quiet",
               "action": "Install",
-              "source": "${var.url_awscli_windows}"
+              "source": "https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi"
+            }
+         },
+         {
+            "action":"aws:runPowerShellScript",
+            "name": "waitForAWSCLI",
+            "inputs":{
+               "runCommand":[
+                  "while (!(Get-Command 'aws' -errorAction SilentlyContinue)){ Wait-Event -Timeout 10}"
+               ]
+            }
+         }
+      ]
+   }
+DOC
+}
+
+resource "aws_ssm_document" "windows_powershell_6" {
+  name          = "Install_PowerShell_Core_windows2012"
+  document_type = "Command"
+
+  content = <<DOC
+  {
+     "schemaVersion": "2.0",
+     "description": "Run a script to securely install PowerShell Core in Windows 2012 instance",
+     "mainSteps": [
+        {
+           "action": "aws:applications",
+           "name": "installApplication",
+           "inputs": {
+              "parameters": "/quiet",
+              "action": "Install",
+              "source": "${var.url_powershell_6_windows}"
             }
          }
       ]
