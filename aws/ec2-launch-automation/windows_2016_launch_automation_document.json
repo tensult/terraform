@@ -24,18 +24,11 @@
         {
             "name": "installAWSCLI",
             "action": "aws:runCommand",
+            "timeoutSeconds": 600,
             "onFailure": "Continue",
             "inputs": {
                 "DocumentName": "Install_AWSCLI_windows",
                 "InstanceIds": ["{{instanceIds}}"]
-              },
-            "nextStep": "wait1minute"
-        },
-        {
-            "name": "wait1minute",
-            "action": "aws:sleep",
-            "inputs": {
-                "Duration": "PT1M"
             },
             "nextStep": "changeHostname"
         },
@@ -43,6 +36,7 @@
             "name": "changeHostname",
             "action": "aws:runCommand",
             "onFailure": "Abort",
+            "timeoutSeconds": 600,
             "inputs": {
                 "DocumentName": "AWS-RunPowerShellScript",
                 "InstanceIds": ["{{instanceIds}}"],
@@ -76,6 +70,7 @@
             "name": "joinDomain",
             "action": "aws:runCommand",
             "onFailure": "Abort",
+            "timeoutSeconds": 600,
             "inputs": {
                 "DocumentName": "AWS-RunPowerShellScript",
                 "InstanceIds": ["{{instanceIds}}"],
