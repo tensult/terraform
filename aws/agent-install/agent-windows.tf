@@ -21,7 +21,7 @@ resource "aws_ssm_document" "windows_awscli" {
             "name": "waitForAWSCLI",
             "inputs":{
                "runCommand":[
-                  "while (!(Get-Command \"aws\" -errorAction SilentlyContinue)){ Wait-Event -Timeout 10}"
+                  "while (!(Get-Command 'aws' -errorAction SilentlyContinue)){ Wait-Event -Timeout 10}"
                ]
             }
          }
