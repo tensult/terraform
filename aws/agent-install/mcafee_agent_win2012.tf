@@ -30,7 +30,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2012" {
                   "$endpoint = ('C:\\Temp\\McAfee\\Endpoint Security Platform 10.5.4 Build 4214 Package #5 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
                   "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
                   "Wait-Event -Timeout 10\n",
-                  "[System.IO.Compression.ZipFile]::ExtractToDirectory($endpoint, 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\')\n",
+                  "[System.IO.Compression.ZipFile]::ExtractToDirectory($endpoint, 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4')\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\setupCC.exe'\n",
                   "Wait-Event -Timeout 60\n",
