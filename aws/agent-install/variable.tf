@@ -59,13 +59,16 @@ variable "url_sccm_agent_windows" {
   description = "url_SCCM_agent_windows"
 }
 
-variable "smsmp" {
+variable "sccm_server" {
   description = "SCCM Server Details"
-  default = "SRVBAN19STDBVM1.Corp.Mphasis.com"
 }
 
 variable "sitecode" {
   description = "SCCM Server Sitecode "
   default = "SMT"
 }
+variable "url_awscli_windows" {
+  description = "url_awscli_windows"
+}
+
 
