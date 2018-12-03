@@ -75,8 +75,7 @@ resource "aws_ssm_document" "sccm_agent_win2012" {
           "$sccm = 'C:\\Users\\Administrator\\Sccm-2016-New-Client.zip'\n",
           "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
           "[System.IO.Compression.ZipFile]::ExtractToDirectory($sccm,'C:\\Users\\Administrator\\SCCM\\')\n",
-          "$ccmpath = ('C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\')\n",
-          "cd $ccmpath\n",
+          "cd 'C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\'\n",
           ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",
           ".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n"
         ]
@@ -103,9 +102,8 @@ resource "aws_ssm_document" "sccm_agent_win2016" {
         "runCommand": [
           "aws s3 cp '${var.url_sccm_agent_windows}' 'C:\\Users\\Administrator\\'\n",
           "$sccm = 'C:\\Users\\Administrator\\Sccm-2016-New-Client.zip'\n",
-          "Expand-Archive -Path '$sccm' -DestinationPath 'C:\\Users\\Administrator\\SCCM\\')\n",
-          "$ccmpath = ('C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\')\n",
-          "cd $ccmpath\n",
+          "Expand-Archive -Path '$sccm' -DestinationPath 'C:\\Users\\Administrator\\SCCM\\'\n",
+          "cd 'C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\'\n",
           ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",
           ".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n"
         ]
