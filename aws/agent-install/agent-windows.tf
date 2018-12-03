@@ -23,7 +23,8 @@ resource "aws_ssm_document" "windows_awscli" {
                "runCommand":[
                   "while (!(Test-Path 'C:\\Program Files\\Amazon\\AWSCLI\\bin\\aws.cmd')){ Wait-Event -Timeout 10}\n",
                   "& 'C:\\Program Files\\Amazon\\AWSCLI\\bin\\aws.cmd'\n",
-                  "echo 'AWS CLI is installed.'"
+                  "echo 'AWS CLI is installed.'\n",
+                  "Restart-Computer -Force"
                ]
             }
          }

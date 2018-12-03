@@ -30,6 +30,20 @@
                 "DocumentName": "Install_AWSCLI_windows",
                 "InstanceIds": ["{{instanceIds}}"]
             },
+            "nextStep": "waitForInstancesToRebootAfterCLI"
+        },
+        {
+            "name": "waitForInstancesToRebootAfterCLI",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
             "nextStep": "changeHostname"
         },
         {
