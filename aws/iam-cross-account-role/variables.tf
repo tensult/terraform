@@ -3,7 +3,15 @@ variable "profile" {
   default     = "default"
 }
 
-variable "requester_account_id" {
+variable "role_name" {
+  description = "Name of role"
+}
+
+variable "permitted_account_id" {
   description = "Account ID of AWS account which gets the permission to the role"
-  default     = "default"
+}
+
+variable "role_policy_arn" {
+  description = "Policy ARN for assume role"
+  default     = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
