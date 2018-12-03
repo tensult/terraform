@@ -9,7 +9,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2012" {
       "mainSteps":[
          {
             "action":"aws:runPowerShellScript",
-            "name":"downloadmcafee",
+            "name":"downloadMcafee",
             "inputs":{
                "runCommand":[
                   "mkdir 'C:\\Temp'\n",
@@ -19,24 +19,24 @@ resource "aws_ssm_document" "mcafee_agent_windows2012" {
                   "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
                   "Wait-Event -Timeout 10\n",
                   "[System.IO.Compression.ZipFile]::ExtractToDirectory($mcafee, 'C:\\Temp\\McAfee\\')\n",
-                  "Wait-Event -Timeout 90\n",
-                  "echo 'McAfee Downloaded Successfully'\n"
+                  "dir 'C:\\Temp\\McAfee\\'\n",
+                  "echo 'McAfee Downloaded Successfully'"
                ]
             }
          },
          {
             "action":"aws:runPowerShellScript",
-            "name":"endpoint",
+            "name":"endpointSecurity",
             "inputs":{
                "runCommand":[
                   "$endsecurity = ('C:\\Temp\\McAfee\\Endpoint Security Platform 10.5.4 Build 4214 Package #5 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
+                  "echo $endsecurity\n",
                   "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
-                  "Wait-Event -Timeout 10\n",
                   "[System.IO.Compression.ZipFile]::ExtractToDirectory($endsecurity, 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\')\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\setupCC.exe'\n",
                   "Wait-Event -Timeout 60\n",
-                  "msiexec.exe /i 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\McAfee_Common_x64.msi /l*v 'C:\\Temp\\logs\\McAfee_Common_x64.log' /qn\n",
+                  "msiexec.exe /i 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\McAfee_Common_x64.msi' /l*v 'C:\\Temp\\logs\\McAfee_Common.log' /qn\n",
                   "echo 'Endpoint Security Installed Successfully'\n"
                ]
             }

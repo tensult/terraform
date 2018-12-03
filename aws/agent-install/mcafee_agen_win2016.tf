@@ -46,7 +46,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\setupCC.exe'\n",
                   "Wait-Event -Timeout 60\n",
-                  "msiexec.exe /i 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\McAfee_Common_x64.msi /log 'C:\\Temp\\logs\\McAfee_Common_x64.log' /qn\n"
+                  "msiexec.exe /i 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\McAfee_Common_x64.msi' /log 'C:\\Temp\\logs\\McAfee_Common_x64.log' /qn\n"
                ]
             }
          },
@@ -76,7 +76,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\WebControl10.5.4\\setupWC.exe'\n",
                   "Wait-Event -Timeout 60\n",
-                  "msiexec.exe /i C:\\Temp\\McAfee\\WebControl10.5.4\\McAfee_Web_Control_x64.msi /l*v C:\\Temp\\logs\\webcontrol.log /qn\n"
+                  "msiexec.exe /i 'C:\\Temp\\McAfee\\WebControl10.5.4\\McAfee_Web_Control_x64.msi' /l*v C:\\Temp\\logs\\webcontrol.log /qn\n"
                ]
             }
          },
