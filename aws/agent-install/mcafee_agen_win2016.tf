@@ -16,7 +16,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                   "mkdir 'C:\\Temp\\logs'\n",
                   "aws s3 cp '${var.url_mcafee_windows}' 'C:\\Temp\\'\n",
                   "$mcafee = ('C:\\Temp\\McAfee_Endpoint_Security_10_5_4_4035_15_stand_alone_client_install.Zip')\n",
-                  "Expand-Archive -Path '$mcafee' -DestinationPath 'C:\\Temp\\McAfee\\'\n"
+                  "Expand-Archive -Path $mcafee -DestinationPath 'C:\\Temp\\McAfee\\'\n"
                ]
             }
          },
@@ -27,7 +27,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                "runCommand":[
                   "$firewall = ('C:\\Temp\\McAfee\\Firewall 10.5.4 Build 4179 Package #1 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
                   "Wait-Event -Timeout 10\n",
-                  "Expand-Archive -Path '$firewall' -DestinationPath 'C:\\Temp\\McAfee\\Firewall10.5.4\\'\n",
+                  "Expand-Archive -Path $firewall -DestinationPath 'C:\\Temp\\McAfee\\Firewall10.5.4\\'\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\Firewall10.5.4\\setupFW.exe'\n",
                   "Wait-Event -Timeout 60\n",
@@ -42,7 +42,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                "runCommand":[
                   "$endpoint = ('C:\\Temp\\McAfee\\Endpoint Security Platform 10.5.4 Build 4214 Package #5 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
                   "Wait-Event -Timeout 10\n",
-                  "Expand-Archive -Path '$endpoint' -DestinationPath 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\'\n",
+                  "Expand-Archive -Path $endpoint -DestinationPath 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\'\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\EndpointSecurityPlatform10.5.4\\setupCC.exe'\n",
                   "Wait-Event -Timeout 60\n",
@@ -57,7 +57,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                "runCommand":[
                   "$threat = ('C:\\Temp\\McAfee\\Threat Prevention 10.5.4 Build 4240 Package #4 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
                   "Wait-Event -Timeout 10\n",
-                  "Expand-Archive -Path '$threat' -DestinationPath 'C:\\Temp\\McAfee\\ThreatPrevention10.5.4\\'\n",
+                  "Expand-Archive -Path $threat -DestinationPath 'C:\\Temp\\McAfee\\ThreatPrevention10.5.4\\'\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\ThreatPrevention10.5.4\\setupTP.exe'\n",
                   "Wait-Event -Timeout 60\n",
@@ -72,7 +72,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2016" {
                "runCommand":[
                   "$webcontrol = ('C:\\Temp\\McAfee\\Web Control 10.5.4 Build 4177 Package #1 PATCH Repost (AAA-LICENSED-RELEASE-PATCH ).Zip')\n",
                   "Wait-Event -Timeout 10\n",
-                  "Expand-Archive -Path '$webcontrol' -DestinationPath 'C:\\Temp\\McAfee\\WebControl10.5.4\\')\n",
+                  "Expand-Archive -Path $webcontrol -DestinationPath 'C:\\Temp\\McAfee\\WebControl10.5.4\\')\n",
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\WebControl10.5.4\\setupWC.exe'\n",
                   "Wait-Event -Timeout 60\n",
