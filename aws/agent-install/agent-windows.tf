@@ -21,7 +21,7 @@ resource "aws_ssm_document" "windows_awscli" {
             "name": "waitForAWSCLI",
             "inputs":{
                "runCommand":[
-                  "while (!(Get-Command 'aws' -errorAction SilentlyContinue)){ Wait-Event -Timeout 10}"
+                  "while (!(Test-Path 'C:\\Program Files\\Amazon\\AWSCLI\\bin\\aws.cmd')){ Wait-Event -Timeout 10}"
                ]
             }
          }
@@ -55,8 +55,8 @@ resource "aws_ssm_document" "snow_agent_windows" {
 DOC
 }
 
-resource "aws_ssm_document" "sccm_agent_windows" {
-  name          = "SCCM_Agent_Windows"
+resource "aws_ssm_document" "sccm_agent_win2012" {
+  name          = "SCCM_Agent_Windows2012"
   document_type = "Command"
 
   content = <<DOC
@@ -70,9 +70,38 @@ resource "aws_ssm_document" "sccm_agent_windows" {
       "inputs": {
         "runCommand": [
           "aws s3 cp '${var.url_sccm_agent_windows}' 'C:\\Users\\Administrator\\'\n",
-          "$sccm = 'C:\\Users\\Administrator\\Sccm-2016-New-Client.Zip'\n",
+          "$sccm = 'C:\\Users\\Administrator\\Sccm-2016-New-Client.zip'\n",
           "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
           "[System.IO.Compression.ZipFile]::ExtractToDirectory($sccm,'C:\\Users\\Administrator\\SCCM\\')\n",
+          "$ccmpath = ('C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\')\n",
+          "cd $ccmpath\n",
+          ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",
+          ".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n"
+        ]
+      }
+    }
+  ]
+}
+DOC
+}
+
+resource "aws_ssm_document" "sccm_agent_win2016" {
+  name          = "SCCM_Agent_Windows2016"
+  document_type = "Command"
+
+  content = <<DOC
+  {
+  "schemaVersion": "2.2",
+  "description": "Run a PowerShell script to securely to install SCCM Agent for Windows instance",
+  "mainSteps": [
+    {
+      "action": "aws:runPowerShellScript",
+      "name": "runPowerShellWithSecureString",
+      "inputs": {
+        "runCommand": [
+          "aws s3 cp '${var.url_sccm_agent_windows}' 'C:\\Users\\Administrator\\'\n",
+          "$sccm = 'C:\\Users\\Administrator\\Sccm-2016-New-Client.zip'\n",
+          "Expand-Archive -Path '$sccm' -DestinationPath 'C:\\Users\\Administrator\\SCCM\\')\n",
           "$ccmpath = ('C:\\Users\\Administrator\\SCCM\\Sccm-2016-New-Client\\CLIENT\\')\n",
           "cd $ccmpath\n",
           ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",

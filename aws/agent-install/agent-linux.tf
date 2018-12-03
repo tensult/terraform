@@ -4,7 +4,7 @@ resource "aws_ssm_document" "mcafee_redhat" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install McAfee Agent in RedHat instance",
       "mainSteps":[
          {
@@ -34,7 +34,7 @@ resource "aws_ssm_document" "snow_redhat" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install Snowsoft Agent in RedHat instance",
       "mainSteps":[
         {
@@ -62,7 +62,7 @@ resource "aws_ssm_document" "mcafee_centos" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install McAfee Agent in CentOS instance",
       "mainSteps":[
          {
@@ -92,7 +92,7 @@ resource "aws_ssm_document" "snow_centos" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install Snowsoft Agent in CentOS instance",
       "mainSteps":[
          {
@@ -120,7 +120,7 @@ resource "aws_ssm_document" "mcafee_amzlinux" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install McAfee Agent in Amazon Linux instance",
       "mainSteps":[
          {
@@ -150,7 +150,7 @@ resource "aws_ssm_document" "snow_amzlinux" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install Snowsoft Agent in Amazon Linux instance",
       "mainSteps":[
          {
@@ -178,7 +178,7 @@ resource "aws_ssm_document" "mcafee_ubuntu" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install McAfee Agent in Ubuntu instance",
       "mainSteps":[
          {
@@ -208,7 +208,7 @@ resource "aws_ssm_document" "snow_ubuntu" {
   
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a Shell script to install Snowsoft Agent in Ubuntu instance",
       "mainSteps":[
          {

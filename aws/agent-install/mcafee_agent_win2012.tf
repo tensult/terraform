@@ -4,7 +4,7 @@ resource "aws_ssm_document" "mcafee_agent_windows2012" {
 
   content = <<DOC
   {
-      "schemaVersion":"2.0",
+      "schemaVersion":"2.2",
       "description":"Run a PowerShell script to securely to install McAfee Agent for Windows instance",
       "mainSteps":[
          {
@@ -82,8 +82,16 @@ resource "aws_ssm_document" "mcafee_agent_windows2012" {
                   "Wait-Event -Timeout 30\n",
                   "& 'C:\\Temp\\McAfee\\WebControl10.5.4\\setupWC.exe'\n",
                   "Wait-Event -Timeout 60\n",
-                  "msiexec.exe /i C:\\Temp\\McAfee\\WebControl10.5.4\\McAfee_Web_Control_x64.msi /l*v C:\\Temp\\logs\\webcontrol.log /qn\n",
-                  "Exit -1"
+                  "msiexec.exe /i 'C:\\Temp\\McAfee\\WebControl10.5.4\\McAfee_Web_Control_x64.msi' /l*v 'C:\\Temp\\logs\\webcontrol.log' /qn\n"
+               ]
+            }
+         },
+         {
+            "action":"aws:runPowerShellScript",
+            "name":"removefolder",
+            "inputs":{
+               "runCommand":[
+                  "Remove-Item -Path 'C:\\Temp\\McAfee' -recurse\n"
                ]
             }
          }
