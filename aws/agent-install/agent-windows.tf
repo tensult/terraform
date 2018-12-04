@@ -63,6 +63,7 @@ resource "aws_ssm_document" "snow_agent_windows" {
                   "mkdir 'C:\\Temp\\'\n",
                   "aws s3 cp '${var.url_snow_agent_windows}' 'C:\\Temp\\windows_snowagent.msi'\n",
                   "msiexec /i 'C:\\Temp\\windows_snowagent.msi' /l* 'C:\\Temp\\snowinstall.log' /qn\n",
+                  "Wait-Event -Timeout 90\n",
                   "Remove-Item -path 'C:\\Temp\\windows_snowagent.msi' -recurse"
                ]
             }
@@ -92,7 +93,11 @@ resource "aws_ssm_document" "sccm_agent_win2012" {
                  "Add-Type -AssemblyName System.IO.Compression.FileSystem\n",
                  "[System.IO.Compression.ZipFile]::ExtractToDirectory($sccm,'C:\\Temp\\SCCM\\')\n",
                  "cd 'C:\\Temp\\SCCM\\Sccm-2016-New-Client\\CLIENT\\'\n",
-                 ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n"
+                 ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n",
+                 "Wait-Event -Timeout 90\n",
+                 "Remove-Item -path $sccm -recurse\n",
+                 "Remove-Item -path 'C:\\Temp\\SCCM' -recurse\n",
+                 "Restart-Computer -Force"
                  ]
            }
         }
@@ -121,7 +126,11 @@ resource "aws_ssm_document" "sccm_agent_win2016" {
                  "Expand-Archive -Path $sccm -DestinationPath 'C:\\Temp\\SCCM\\'\n",
                  "cd 'C:\\Temp\\SCCM\\Sccm-2016-New-Client\\CLIENT\\'\n",
                  ".\\ccmsetup SMSMP=${var.sccm_server} SMSSITECODE=${var.sitecode}\n",
-                 ".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n"
+                 ".\\ccmsetup.exe /usepkicert smsmp=${var.sccm_server} ccmhostname=${var.sccm_server} smssitecode=${var.sitecode}\n",
+                 "Wait-Event -Timeout 90\n",
+                 "Remove-Item -path $sccm -recurse\n",
+                 "Remove-Item -path 'C:\\Temp\\SCCM' -recurse\n",
+                 "Restart-Computer -Force"
               ]
            }
         }
@@ -147,6 +156,7 @@ resource "aws_ssm_document" "scom_agent_windows" {
                   "mkdir 'C:\\Temp\\'\n",
                   "aws s3 cp '${var.url_scom_agent_windows}' 'C:\\Temp\\windows_scomagent.msi'\n",
                   "msiexec.exe /i 'C:\\Temp\\windows_scomagent.msi' /l*v 'C:\\Temp\\MOMAgentinstall.log' USE_SETTINGS_FROM_AD=0 USE_MANUALLY_SPECIFIED_SETTINGS=1 MANAGEMENT_GROUP=Mphasis-Opsmgr MANAGEMENT_SERVER_DNS=SRVBAN19SMMSPH2 ACTIONS_USE_COMPUTER_ACCOUNT=1 AcceptEndUserLicenseAgreement=1 /qn\n",
+                  "Wait-Event -Timeout 90\n",
                   "Remove-Item -path 'C:\\Temp\\windows_scomagent.msi' -recurse"
                ]
             }
