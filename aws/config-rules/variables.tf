@@ -2,6 +2,7 @@ variable "profile" {
   description = "AWS Profile"
   default     = "default"
 }
+
 variable "region" {
   description = "AWS region"
   default     = "ap-south-1"
@@ -22,8 +23,13 @@ variable "ses_email" {
 variable "admin_email" {
   description = "Admin email"
 }
+
 variable "notification_emails" {
   description = "Email to be notified"
-  type = "string"
-  default = ""
+  type        = "string"
+  default     = ""
+}
+
+variable "company_name" {
+  description = "Name of the company"
 }

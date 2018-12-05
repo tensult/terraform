@@ -1,8 +1,8 @@
-
 provider "aws" {
   profile = "${var.profile}"
   region  = "${var.region}"
 }
+
 resource "aws_iam_role" "lambda_role" {
   name = "EC2-Tag-Checker-Lambda"
 
@@ -47,18 +47,18 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "${aws_iam_policy.lambda_policy.arn}"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "${aws_iam_policy.lambda_policy.arn}"
 }
 
 data "archive_file" "lambda_code" {
   type        = "zip"
-  source_dir = "lambda"
+  source_dir  = "lambda"
   output_path = "lambda.zip"
 }
 
@@ -73,19 +73,20 @@ resource "aws_lambda_function" "lambda_function" {
 
   environment {
     variables = {
-      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}",
-      adminEmail = "${var.admin_email}"
-      sesEmail = "${var.ses_email}"
-      accountName = "${var.account_name}"
-      sendToAdmin = "${var.send_to_admin}"
-      stopInstances = "${var.stop_instances}"
+      notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
+      adminEmail         = "${var.admin_email}"
+      sesEmail           = "${var.ses_email}"
+      accountName        = "${var.account_name}"
+      sendToAdmin        = "${var.send_to_admin}"
+      stopInstances      = "${var.stop_instances}"
+      company_name       = "${var.company_name}"
     }
   }
 }
 
 resource "aws_cloudwatch_event_rule" "daily_check_ec2" {
-  name        = "Daily-Check-EC2-instance-tags"
-  description = "Checks the tags of the EC2 instances and takes action based on expiry"
+  name                = "Daily-Check-EC2-instance-tags"
+  description         = "Checks the tags of the EC2 instances and takes action based on expiry"
   schedule_expression = "cron(30 4 * * ? *)"
 }
 

@@ -2,6 +2,7 @@ variable "profile" {
   description = "AWS Profile"
   default     = "default"
 }
+
 variable "region" {
   description = "AWS region"
   default     = "ap-south-1"
@@ -47,6 +48,10 @@ variable "url_scom_agent_windows" {
   description = "url_scom_agent_windows"
 }
 
+variable "scom_management_group" {
+  description = "SCOM management group"
+}
+
 variable "url_powershell_6_windows" {
   description = "url_powershell_6_windows"
 }
@@ -65,10 +70,9 @@ variable "sccm_server" {
 
 variable "sitecode" {
   description = "SCCM Server Sitecode "
-  default = "SMT"
+  default     = "SMT"
 }
+
 variable "url_awscli_windows" {
   description = "url_awscli_windows"
 }
-
-

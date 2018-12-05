@@ -3,46 +3,45 @@ data "aws_kms_key" "ssm" {
 }
 
 resource "aws_ssm_parameter" "domain_username" {
-  name  = "/domain/username"
-  description  = "Domain username"
-  type  = "String"
-  value = "${var.domain_username}"
-  overwrite = true
+  name        = "/domain/username"
+  description = "Domain username"
+  type        = "String"
+  value       = "${var.domain_username}"
+  overwrite   = true
 }
 
 resource "aws_ssm_parameter" "domain_password" {
-  name  = "/domain/password"
-  description  = "Domain password"
-  type  = "SecureString"
-  value = "${var.domain_password}"
-  key_id = "${data.aws_kms_key.ssm.arn}"
-  overwrite = true
+  name        = "/domain/password"
+  description = "Domain password"
+  type        = "SecureString"
+  value       = "${var.domain_password}"
+  key_id      = "${data.aws_kms_key.ssm.arn}"
+  overwrite   = true
 }
 
 resource "aws_ssm_parameter" "ipdns" {
-  name  = "/domain/dns_ip"
-  description  = "DNS IP Address"
-  type  = "String"
-  value = "${join(",", var.domain_dns_ips)}"
-  overwrite = true
+  name        = "/domain/dns_ip"
+  description = "DNS IP Address"
+  type        = "String"
+  value       = "${join(",", var.domain_dns_ips)}"
+  overwrite   = true
 }
 
 resource "aws_ssm_parameter" "domain_name" {
-  name  = "/domain/name"
-  description  = "Domain name"
-  type  = "String"
-  value = "${var.domain_name}"
-  overwrite = true
+  name        = "/domain/name"
+  description = "Domain name"
+  type        = "String"
+  value       = "${var.domain_name}"
+  overwrite   = true
 }
 
 resource "aws_ssm_parameter" "domain_ou_path" {
-  name  = "/domain/ou_path"
-  description  = "Domain OU path"
-  type  = "String"
-  value = "${var.domain_ou_path}"
-  overwrite = true
+  name        = "/domain/ou_path"
+  description = "Domain OU path"
+  type        = "String"
+  value       = "${var.domain_ou_path}"
+  overwrite   = true
 }
-
 
 resource "aws_ssm_document" "windows_2012" {
   name          = "Windows_2012_Domain_Join"
@@ -80,7 +79,7 @@ resource "aws_ssm_document" "windows_2016" {
   name          = "Windows_2016_Domain_Join"
   document_type = "Command"
 
-   content = <<DOC
+  content = <<DOC
   {
       "schemaVersion":"2.0",
       "description":"Run a PowerShell script to securely domain-join a Windows instance",
@@ -108,11 +107,11 @@ resource "aws_ssm_document" "windows_2016" {
    }
 DOC
 }
-  
+
 resource "aws_ssm_document" "redhatlinux" {
   name          = "RedHat_CentOS_Domain_Join"
   document_type = "Command"
-  
+
   content = <<DOC
   {
       "schemaVersion":"2.0",
@@ -144,7 +143,8 @@ resource "aws_ssm_document" "redhatlinux" {
                   "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                   "echo Updated sshd_config, now restarting sshd service\n",
                   "/bin/systemctl restart sshd.service\n",
-                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement\n",
+                  "echo \"CIOCloudmanagement@$domain ALL=(ALL) ALL\"
+                   >> /etc/sudoers.d/CIOCloudmanagement\n",
                   "sudo shutdown -r 1"
                ]
             }
@@ -157,7 +157,7 @@ DOC
 resource "aws_ssm_document" "linux" {
   name          = "Ubuntu_Amzlinux_Domain_Join"
   document_type = "Command"
-  
+
   content = <<DOC
   {
       "schemaVersion":"2.0",
@@ -189,7 +189,7 @@ resource "aws_ssm_document" "linux" {
                   "sed -i -e 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config\n",
                   "echo Updated sshd_config, now restarting sshd service\n",
                   "/bin/systemctl restart sshd.service\n",
-                  "echo 'CIOCloudmanagement@corp.mphasis.com ALL=(ALL) ALL' >> /etc/sudoers.d/CIOCloudmanagement\n",
+                  "echo \"CIOCloudmanagement@$domain ALL=(ALL) ALL\" >> /etc/sudoers.d/CIOCloudmanagement\n",
                   "sudo shutdown -r 1"
                ]
             }
@@ -202,7 +202,7 @@ DOC
 resource "aws_ssm_document" "Hostname_Windows" {
   name          = "Hostname_Change_Windows"
   document_type = "Command"
-  
+
   content = <<DOC
   {
       "schemaVersion":"2.0",
@@ -229,7 +229,7 @@ DOC
 resource "aws_ssm_document" "Hostname_Linux" {
   name          = "Hostname_Change_Linux"
   document_type = "Command"
-  
+
   content = <<DOC
   {
       "schemaVersion":"2.0",
@@ -261,7 +261,7 @@ DOC
 resource "aws_ssm_document" "Hostname_Ubuntu" {
   name          = "Hostname_Change_Ubuntu"
   document_type = "Command"
-  
+
   content = <<DOC
   {
    "schemaVersion":"2.0",

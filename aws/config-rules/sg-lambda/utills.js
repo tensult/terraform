@@ -5,7 +5,7 @@ const securityGroupMailBody = (resourceObject)=>{
     <html>
     <body>
     <p><font size="+2"></font>Dear User,</font></p>
-    <font size="+3" color="red">Attention:</font> This is to inform you that the port you have opened does not meet the security compliance standard followed by Mphasis Limited. The resource details are attached below.
+    <font size="+3" color="red">Attention:</font> This is to inform you that the port you have opened does not meet the security compliance standard followed by ${process.env.company_name}. The resource details are attached below.
     <p><font size="+1">Security Group Details:</font></p>
     </body>
     </html>

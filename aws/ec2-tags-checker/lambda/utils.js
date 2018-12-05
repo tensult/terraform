@@ -22,7 +22,7 @@ const missingTagsMailBody = (instancesOfMissingTags) => {
     <html>
     <body>
     <p><font size="+2"></font>Dear User,</font></p>
-    <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created does not meet the tagging - policies as per the standard followed by Mphasis Limited. Below are the mandatory tags that needs to be added during a fresh deployment.
+    <font size="+3" color="red">Attention:</font> This is to inform you that the resource you have created does not meet the tagging - policies as per the standard followed by ${process.env.company_name}. Below are the mandatory tags that needs to be added during a fresh deployment.
     <p><font size="+1">Non-compliant servers:</font></p>
     ${prepareMailBody(instancesOfMissingTags)} 
     <p><font size="+1">Mandatory Tags List:</font></p>

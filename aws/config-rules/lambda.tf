@@ -40,18 +40,18 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_main_policy_attachment" {
-    role       = "${aws_iam_role.lambda_role.name}"
-    policy_arn = "${aws_iam_policy.lambda_policy.arn}"
+  role       = "${aws_iam_role.lambda_role.name}"
+  policy_arn = "${aws_iam_policy.lambda_policy.arn}"
 }
 
 data "archive_file" "security_groups" {
   type        = "zip"
-  source_dir = "sg-lambda"
+  source_dir  = "sg-lambda"
   output_path = "sg-lambda.zip"
 }
 
@@ -67,18 +67,19 @@ resource "aws_lambda_function" "security_groups" {
   environment {
     variables = {
       notificationEmails = "${coalesce(var.notification_emails, var.ses_email)}"
-      sesEmail = "${var.ses_email}"
-      accountName = "${var.account_name}"
-      adminEmail = "${var.admin_email}"
+      sesEmail           = "${var.ses_email}"
+      accountName        = "${var.account_name}"
+      adminEmail         = "${var.admin_email}"
+      company_name       = "${var.company_name}"
     }
   }
 }
 
 resource "aws_lambda_permission" "security_groups" {
-  statement_id   = "AllowExecutionFromConfig"
-  action         = "lambda:InvokeFunction"
-  function_name  = "${aws_lambda_function.security_groups.function_name}"
-  principal      = "config.amazonaws.com"
+  statement_id  = "AllowExecutionFromConfig"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.security_groups.function_name}"
+  principal     = "config.amazonaws.com"
 }
 
 data "archive_file" "instance_tags" {
@@ -104,8 +105,8 @@ resource "aws_lambda_function" "instance_tags" {
 }
 
 resource "aws_lambda_permission" "instance_tags" {
-  statement_id   = "AllowExecutionFromConfig"
-  action         = "lambda:InvokeFunction"
-  function_name  = "${aws_lambda_function.instance_tags.function_name}"
-  principal      = "config.amazonaws.com"
+  statement_id  = "AllowExecutionFromConfig"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.instance_tags.function_name}"
+  principal     = "config.amazonaws.com"
 }

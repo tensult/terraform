@@ -35,6 +35,9 @@ variable "send_to_admin" {
 variable "stop_instances" {
   description = "Instances to be stopped"
   type        = "string"
-  default     = "yes"  
+  default     = "yes"
 }
 
+variable "company_name" {
+  description = "Name of the company"
+}
