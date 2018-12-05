@@ -47,6 +47,7 @@ resource "aws_dlm_lifecycle_policy" "snapshot_policy" {
       tags_to_add {
         SnapshotCreator = "DLM"
       }
+      copy_tags = true
     }
 
     target_tags {
