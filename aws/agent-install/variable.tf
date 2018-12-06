@@ -52,10 +52,6 @@ variable "scom_management_group" {
   description = "SCOM management group"
 }
 
-variable "url_powershell_6_windows" {
-  description = "url_powershell_6_windows"
-}
-
 variable "url_mcafee_windows" {
   description = "url_mcafee_windows"
 }
