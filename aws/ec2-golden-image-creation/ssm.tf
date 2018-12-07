@@ -221,7 +221,6 @@ resource "aws_ssm_document" "AWS_Create_Image" {
 DOC
 }
 
-
 resource "aws_ssm_document" "windows_unjoin_domain" {
   name          = "Windows_Unjoin_Domain"
   document_type = "Command"
@@ -241,7 +240,7 @@ resource "aws_ssm_document" "windows_unjoin_domain" {
                   "$domain_username = \"$domain\\$username\"\n",
                   "$password = (Get-SSMParameterValue -Name /domain/password -WithDecryption $True).Parameters[0].Value | ConvertTo-SecureString -asPlainText -Force\n",
                   "$credential = New-Object System.Management.Automation.PSCredential($domain_username,$password)\n",
-                  "Remove-Computer -UnjoinDomaincredential $credential -WorkgroupName "WORKGROUP" -Force -PassThru -Verbose -Restart\n",
+                  "Remove-Computer -UnjoinDomaincredential $credential -WorkgroupName \"WORKGROUP\" -Force -PassThru -Verbose -Restart"
                ]
             }
          }
