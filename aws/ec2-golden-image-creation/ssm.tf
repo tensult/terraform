@@ -116,8 +116,10 @@ resource "aws_ssm_document" "AWS_Create_Image" {
           "InstanceIds": ["{{instanceId}}"],
           "Parameters": {
               "commands": [
-                  "/opt/McAfee/agent/bin/maconfig -enforce -noguid\n",
-                  "echo \"Instance is ready now\""
+                "sudo su -\n",
+                "realm leave\n",
+                "/opt/McAfee/agent/bin/maconfig -enforce -noguid\n",
+                "echo \"Instance is ready now\""
               ]
           }
       },
