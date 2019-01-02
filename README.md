@@ -35,3 +35,6 @@ You can click on the following links to get a better understanding about DMS.
 
 Please make sure to go through the readme files of each implementation so that the code wll give you the desired output. There is a "main.tf" file which configures the AWS environment while the "variables.tf" file is used to define the variables such as CIDR blocks, names, tags etc for the corresponding AWS resources. This is still a work in progress so feel free to reach out in case something is missing.
 
+### [VPC Peering Connections](https://github.com/tensult/terraform/tree/master/aws/vpc-peering-connection)
+Creating peering connections between VPCs is a basic networking use-case, and helps reduce load on VPN connections, are reduces latency between the VPCs. here is a "main.tf" file which creates the peering connection requests and the route table entries, and the "variables.tf" file is used to define the variables. You can read the blog post to understand the code [VPC Peering using Terraform](https://medium.com/tensult/vpc-peering-using-terraform-105d554ed04d)
+
