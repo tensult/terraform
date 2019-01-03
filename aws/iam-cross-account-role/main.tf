@@ -23,3 +23,8 @@ resource "aws_iam_role_policy_attachment" "permission" {
   role       = "${aws_iam_role.cross_account.name}"
   policy_arn = "${var.role_policy_arn}"
 }
+
+resource "aws_iam_role_policy_attachment" "read_permission" {
+  role       = "${aws_iam_role.cross_account.name}"
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
