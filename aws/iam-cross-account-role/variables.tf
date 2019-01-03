@@ -13,5 +13,5 @@ variable "permitted_account_id" {
 
 variable "role_policy_arn" {
   description = "Policy ARN for assume role"
-  default     = "arn:aws:iam::aws:policy/AdministratorAccess"
+  default     = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
