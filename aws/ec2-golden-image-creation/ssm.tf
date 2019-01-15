@@ -138,6 +138,7 @@ resource "aws_ssm_document" "AWS_Create_Image" {
     {
       "name": "runSysprepForWindows",
       "action": "aws:runCommand",
+      "onFailure": "Abort",
       "inputs": {
         "DocumentName": "AWSEC2-RunSysprep",
         "InstanceIds": [
