@@ -74,7 +74,7 @@ resource "aws_ssm_document" "AWS_Create_Image" {
       "name": "prepareWindowsInstance",
       "action": "aws:runCommand",
       "onFailure": "step:unsetMcafeeAgentOnWindows",
-      "isCritical": false,
+      "timeoutSeconds": 120,
       "inputs": {
         "DocumentName": "Windows_Unjoin_Domain",
         "InstanceIds": [
@@ -95,13 +95,13 @@ resource "aws_ssm_document" "AWS_Create_Image" {
       "name": "unsetMcafeeAgentOnWindows",
       "action": "aws:runCommand",
       "onFailure": "step:runSysprepForWindows",
-      "isCritical": false,
+      "timeoutSeconds": 300,
       "inputs": {
           "DocumentName": "AWS-RunPowerShellScript",
           "InstanceIds": ["{{instanceId}}"],
           "Parameters": {
               "commands": [
-                  "Invoke-Expression \"C:\\Program Files\\McAfee\\Agent\\maconfig.exe\" -enforce -noguid\n",
+                  "& \"C:\\Program Files\\McAfee\\Agent\\maconfig.exe\" -enforce -noguid\n",
                   "echo \"Instance is ready now\""
               ]
           }
@@ -138,6 +138,8 @@ resource "aws_ssm_document" "AWS_Create_Image" {
     {
       "name": "runSysprepForWindows",
       "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 300,
       "onFailure": "Abort",
       "inputs": {
         "DocumentName": "AWSEC2-RunSysprep",
@@ -151,7 +153,7 @@ resource "aws_ssm_document" "AWS_Create_Image" {
       "name": "waitAfterSysprep",
       "action": "aws:sleep",
       "inputs": {
-        "Duration": "PT1M"
+        "Duration": "PT2M"
       },
       "nextStep": "createImage"
     },
