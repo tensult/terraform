@@ -25,27 +25,13 @@
         {
             "name": "InstallCloudWatchPackage",
             "action": "aws:runCommand",
-            "onFailure": "Continue",
-            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "timeoutSeconds": 120,
             "inputs": {
                 "DocumentName": "AWS-ConfigureAWSPackage",
                 "Action": "Install",
                 "Name": "AmazonCloudWatchAgent",
                 "InstanceIds": ["{{instanceIds}}"]
-            },
-            "nextStep": "waitForInstancesToRebootAfterCLI"
-        },
-        {
-            "name": "waitForInstancesToRebootAfterCLI",
-            "action": "aws:changeInstanceState",
-            "timeoutSeconds": 600,
-            "onFailure": "Abort",
-            "inputs": {
-                "InstanceIds": [
-                    "{{instanceIds}}"
-                ],
-                "CheckStateOnly": true,
-                "DesiredState": "running"
             },
             "nextStep": "ConfigureManageAgent"
         },
