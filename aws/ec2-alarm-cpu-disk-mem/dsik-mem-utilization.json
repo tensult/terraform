@@ -1,0 +1,65 @@
+{
+    "description": "Disk_Memory_Utilization_Alarm",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to run launch setup"
+        }
+    },
+    "mainSteps": [
+        {
+            "name": "waitForInstancesToStart",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "InstallCloudWatchPackage"
+        },
+        {
+            "name": "InstallCloudWatchPackage",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "timeoutSeconds": 600,
+            "inputs": {
+                "DocumentName": "AWS-ConfigureAWSPackage",
+                "Action": "Install",
+                "Name": "AmazonCloudWatchAgent",
+                "InstanceIds": ["{{instanceIds}}"]
+            },
+            "nextStep": "waitForInstancesToRebootAfterCLI"
+        },
+        {
+            "name": "waitForInstancesToRebootAfterCLI",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "ConfigureManageAgent"
+        },
+        {
+            "name": "ConfigureManageAgent",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "timeoutSeconds": 600,
+            "inputs": {
+                "DocumentName": "AmazonCloudWatch-ManageAgent",
+                "Optional Configuration Location": "{aws_ssm_parameter.cloudwatch_parameter.name}",
+                "InstanceIds": ["{{instanceIds}}"]
+            },
+            "nextStep": "waitForInstancesToRebootAfterCLI"
+        }
+    ]
+}
