@@ -5,7 +5,6 @@ variable "profile" {
 
 variable "region" {
   description = "AWS Region"
-  default = "ap-south-1"
 }
 
 variable "instance_id" {
@@ -19,6 +18,24 @@ variable "app_name" {
 variable "sns_topic" {
   description = "SNS Topic for Sending CloudWatch Alarm Notification"
 }
+
+variable "ec2_action" {
+  description = "EC2 action for Creating Alarm"
+}
+
+variable "rds_instance" {
+  description = "Name of the RDS Instace"
+}
+
+variable "freestoragespace" {
+  description = "Threshold value of Free Storage Space"
+}
+
+variable "freeablememory" {
+  description = "Threshold value of Freeable­ Memory"
+}
+
+
 
 
 

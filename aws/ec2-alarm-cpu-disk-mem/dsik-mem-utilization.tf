@@ -3,8 +3,7 @@ resource "aws_ssm_parameter" "cloudwatch_parameter" {
   description = "SSM Parameter for Disk and Memory Utilization"
   type        = "String"
   overwrite   = true
-  value       = 
-  <<EOF
+  value       = <<DOC
   {
     "logs": {
       "logs_collected": {
@@ -20,10 +19,10 @@ resource "aws_ssm_parameter" "cloudwatch_parameter" {
     },
     "metrics": {
       "append_dimensions": {
-        "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
-        "ImageId": "${aws:ImageId}",
-        "InstanceId": "${aws:InstanceId}",
-        "InstanceType": "${aws:InstanceType}"
+        "AutoScalingGroupName": "$${aws:AutoScalingGroupName}",
+        "ImageId": "$${aws:ImageId}",
+        "InstanceId": "$${aws:InstanceId}",
+        "InstanceType": "$${aws:InstanceType}"
       },
       "metrics_collected": {
         "cpu": {
@@ -86,5 +85,67 @@ resource "aws_ssm_parameter" "cloudwatch_parameter" {
       }
     }
   }
-EOF
+DOC
+}
+
+resource "aws_ssm_document" "Disk-Memory-Utilization" {
+  name          = "Instance_Disk_Memory_Utilization_Alarm"
+  document_type = "Automation"
+
+  content = <<DOC
+{
+    "description": "Disk_Memory_Utilization_Alarm",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to run launch setup"
+        }
+    },
+    "mainSteps": [
+        {
+            "name": "waitForInstancesToStart",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "InstallCloudWatchPackage"
+        },
+        {
+            "name": "InstallCloudWatchPackage",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "timeoutSeconds": 120,
+            "inputs": {
+                "DocumentName": "AWS-ConfigureAWSPackage",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "action": "Install",
+                    "name": "AmazonCloudWatchAgent"
+                }
+            },
+            "nextStep": "ConfigureManageAgent"
+        },
+        {
+            "name": "ConfigureManageAgent",
+            "action": "aws:runCommand",
+            "onFailure": "Abort",
+            "timeoutSeconds": 600,
+            "inputs": {
+                "DocumentName": "AmazonCloudWatch-ManageAgent",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "optionalConfigurationLocation": "AmazonCloudWatch-linux"
+                }
+            }
+        }
+    ]
+}
+DOC
 }
