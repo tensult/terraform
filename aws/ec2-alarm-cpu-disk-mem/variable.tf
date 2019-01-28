@@ -35,6 +35,21 @@ variable "freeablememory" {
   description = "Threshold value of Freeable­ Memory"
 }
 
+variable "load_balancer" {
+  description = "ARN of the Load Balancer"
+}
+
+variable "lb_name" {
+  description = "Name of the Load Balancer"
+}
+
+variable "alb_targetgroup" {
+  description = "ARN of the Load Balancer Target Group"
+}
+
+
+
+
 
 
 
