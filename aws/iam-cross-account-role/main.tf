@@ -35,6 +35,7 @@ resource "aws_iam_policy" "iam_permission" {
                 "iam:AddRoleToInstanceProfile",
                 "iam:AttachRolePolicy",
                 "iam:CreatePolicy",
+                "iam:PutRolePolicy",
                 "iam:CreateInstanceProfile",
                 "sts:GetCallerIdentity"
             ],
