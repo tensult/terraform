@@ -18,13 +18,19 @@ resource "aws_iam_role" "cross_account" {
 EOF
 }
 
+
 #Attach policy
-resource "aws_iam_role_policy_attachment" "permission" {
+resource "aws_iam_role_policy_attachment" "poweruser" {
   role       = "${aws_iam_role.cross_account.name}"
-  policy_arn = "${var.role_policy_arn}"
+  policy_arn = "${data.aws_iam_policy.power_user.arn}"
 }
 
 resource "aws_iam_role_policy_attachment" "read_permission" {
   role       = "${aws_iam_role.cross_account.name}"
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  policy_arn = "${data.aws_iam_policy.readonly.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_limit" {
+  role       = "${aws_iam_role.cross_account.name}"
+  policy_arn = "${aws_iam_policy.iam_limit_access.arn}"
 }
