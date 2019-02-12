@@ -5,7 +5,7 @@ variable "profile" {
 }
 variable "region" {
   description = "AWS region"
-  default     = "ap-south-1"
+  default     = "default"
 }
 
 variable "vpc_cidr" {
@@ -28,7 +28,33 @@ variable "sub_private_1b" {
   description = "CIDR for the private subnet"
 }
 
-#Customet Gateway
-variable "customer_gw" {
-  description = "Define customer Gateway"
+variable "sb_sshArch_1a" {
+  description = "CIDR"
 }
+
+variable "sb_sshArch_1b" {
+  description = "CIDR"
+}
+
+variable "sb_rds_1a" {
+  description = "CIDR"
+}
+
+variable "sb_rds_1b" {
+  description = "CIDR"
+}
+
+variable "sb_iopted_1a" {
+  description = "CIDR"
+}
+
+variable "sb_iopted_1b" {
+  description = "CIDR"
+}
+
+
+
+# #Customet Gateway
+# variable "customer_gw" {
+#   description = "Define customer Gateway"
+# }
