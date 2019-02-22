@@ -10,6 +10,9 @@ resource "aws_internet_gateway" "gw" {
 #Assign Elastic IP
 resource "aws_eip" "nat" {
   vpc      = true
+  tags = {
+    Name = "eip_nat"
+  }
 }
 
 
@@ -19,6 +22,6 @@ resource "aws_nat_gateway" "nat" {
   subnet_id     = "${aws_subnet.sub_pub_1a.id}"
 
   tags {
-    Name = "NAT-prod"
+    Name = "nat_prod"
   }
 }
