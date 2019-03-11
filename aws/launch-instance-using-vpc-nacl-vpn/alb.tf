@@ -1,51 +1,49 @@
-# Creating application load balancer
+resource "aws_lb" "web_alb" {
+  name                  = "alb-${var.customer}"
+  internal              = false
+  ip_address_type       = "ipv4"
+  load_balancer_type    = "application"
+  security_groups       = ["${aws_security_group.sg_alb.id}"]
+  subnets               = ["${aws_subnet.sub_public_1a.id}","${aws_subnet.sub_public_1b.id}"]
 
-resource "aws_lb" "weblb" {
-  name               = "${var.lb_name}"
-  load_balancer_type = "application"
-  security_groups    = ["${aws_security_group.webserver_sg.id}"]
-  subnets            = ["${aws_subnet.web.*.id}"]
-
-  tags {
-    Name = "${var.lb_name}"
+  tags = {
+      Name  = "alb_${var.customer}"
   }
 }
 
-# Creating load balancer target group
+resource "aws_lb_listener" "web_alb_http_listener" {
+  load_balancer_arn     = "${aws_lb.web_alb.arn}"
+  port                  = "8080"
+  protocol              = "HTTP"
 
-resource "aws_lb_target_group" "alb_group" {
-  name     = "${var.tg_name}"
-  port     = "${var.tg_port}"
-  protocol = "${var.tg_protocol}"
-  vpc_id   = "${aws_vpc.default.id}"
+  default_action        = {
+      type              = "forward"
+      target_group_arn  = "${aws_lb_target_group.tg_web_alb.arn}"
+  }
+
 }
 
-#Creating listeners
+// Web Load balancer target group
 
-resource "aws_lb_listener" "webserver-lb" {
-  load_balancer_arn = "${aws_lb.weblb.arn}"
-  port              = "${var.listener_port}"
-  protocol          = "${var.listener_protocol}"
-
-  # certificate_arn  = "${var.certificate_arn_user}"
-  default_action {
-    target_group_arn = "${aws_lb_target_group.alb_group.arn}"
-    type             = "forward"
-  }
+resource "aws_lb_target_group" "tg_web_alb" {
+  name     = "tg-${var.customer}"
+  port     = 8080
+  protocol = "HTTP"
+  target_type = "instance"
+  vpc_id   = "${data.aws_vpc.vpc_client.id}"
 }
 
-#Creating listener rules
 
-resource "aws_lb_listener_rule" "allow_all" {
-  listener_arn = "${aws_lb_listener.webserver-lb.arn}"
+//target group attachment
 
-  action {
-    type             = "forward"
-    target_group_arn = "${aws_lb_target_group.alb_group.arn}"
-  }
+resource "aws_lb_target_group_attachment" "tg_web_alb_inst_attach_1a" {
+    target_group_arn = "${aws_lb_target_group.tg_web_alb.arn}"
+    target_id        = "${aws_instance.appserver.id}"
+    port             = "8080"
+}
 
-  condition {
-    field  = "path-pattern"
-    values = ["*"]
-  }
+resource "aws_lb_target_group_attachment" "tg_web_alb_inst_attach_1b" {
+    target_group_arn = "${aws_lb_target_group.tg_web_alb.arn}"
+    target_id        = "${aws_instance.appserver01.id}"
+    port             = "8080"
 }

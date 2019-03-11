@@ -21,7 +21,7 @@ output "vgw" {
   value = "${data.aws_vpn_gateway.vgw.id}"
 }
 
-Create VPN Tunnel
+#Create VPN Tunnel
 
 resource "aws_vpn_connection" "vpn" {
   vpn_gateway_id      = "${data.aws_vpn_gateway.vgw.id}"

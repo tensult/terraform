@@ -10,27 +10,25 @@ resource "aws_security_group" "sg_alb" {
   name        = "sg_${var.customer}_alb"
   description = "Security Group for ${var.customer} Application Load Balancer"
   vpc_id      = "${data.aws_vpc.vpc_client.id}"
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    security_groups = ["0.0.0.0/0"]
-  }
-
-    ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = ["0.0.0.0/0"]
-  }
-
-    ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    security_groups = ["0.0.0.0/0"]
-  }
+  
+  # ingress {
+  #   from_port   = 8080
+  #   to_port     = 8080
+  #   protocol    = "tcp"
+  #   security_groups = ["0.0.0.0/0"]
+  # }
+  # ingress {
+  #   from_port   = 80
+  #   to_port     = 80
+  #   protocol    = "tcp"
+  #   security_groups = ["0.0.0.0/0"]
+  # }
+  # ingress {
+  #   from_port   = 443
+  #   to_port     = 443
+  #   protocol    = "tcp"
+  #   security_groups = ["0.0.0.0/0"]
+  # }
 
   egress {
     from_port   = 0
@@ -55,14 +53,14 @@ resource "aws_security_group" "sg_appserver" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    security_groups = "${aws_security_group.sg_alb.id}"
+    security_groups = ["${aws_security_group.sg_alb.id}"]
   }
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    security_groups = "${var.sg_bastion}"
+    security_groups = ["${var.sg_bastion}"]
   }
 
   egress {
@@ -88,14 +86,14 @@ resource "aws_security_group" "sg_mongodb" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    security_groups = "${aws_security_group.sg_appserver.id}"
+    security_groups = ["${aws_security_group.sg_appserver.id}"]
   }
 
   ingress {
     from_port   = 22
     to_port     = 22
-    protocol    = "-1"
-    security_groups = "${var.sg_bastion}"
+    protocol    = "tcp"
+    security_groups = ["${var.sg_bastion}"]
   }
 
   egress {
@@ -121,21 +119,21 @@ resource "aws_security_group" "sg_rds" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    security_groups = "${aws_security_group.sg_mongodb.id}"
+    security_groups = ["${aws_security_group.sg_mongodb.id}"]
   }
 
     ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    security_groups = "${aws_security_group.sg_appserver.id}"
+    security_groups = ["${aws_security_group.sg_appserver.id}"]
   }
 
   ingress {
     from_port   = 3306
     to_port     = 3306
-    protocol    = "-1"
-    security_groups = "${var.sg_bastion}"
+    protocol    = "tcp"
+    security_groups = ["${var.sg_bastion}"]
   }
 
   egress {
@@ -146,6 +144,6 @@ resource "aws_security_group" "sg_rds" {
   }
 
   tags {
-    Name = "${var.websg_name}"
+    Name = "sg_${var.customer}_rds"
   }
 }

@@ -6,7 +6,7 @@ resource "aws_network_acl" "nacl" {
 
   egress{
     protocol   = "tcp"
-    rule_no    = 100
+    rule_no    = 200
     action     = "allow"
     cidr_block = "${var.customer_cidr_block}"
     from_port  = 22
@@ -15,7 +15,7 @@ resource "aws_network_acl" "nacl" {
 
   egress{
     protocol   = "tcp"
-    rule_no    = 101
+    rule_no    = 201
     action     = "allow"
     cidr_block = "${var.bastion_ip}"
     from_port  = 22
@@ -24,7 +24,7 @@ resource "aws_network_acl" "nacl" {
 
   ingress{
     protocol   = "tcp"
-    rule_no    = 100
+    rule_no    = 200
     action     = "allow"
     cidr_block = "${var.customer_cidr_block}"
     from_port  = 22
@@ -33,7 +33,7 @@ resource "aws_network_acl" "nacl" {
 
     ingress{
     protocol   = "tcp"
-    rule_no    = 100
+    rule_no    = 201
     action     = "allow"
     cidr_block = "${var.bastion_ip}"
     from_port  = 22

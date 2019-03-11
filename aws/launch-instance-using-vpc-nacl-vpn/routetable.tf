@@ -6,6 +6,11 @@ data "aws_internet_gateway" "igw" {
   }
 }
 
+data "aws_nat_gateway" "nat_gw" {
+  vpc_id = "${data.aws_vpc.vpc_client.id}"
+}
+
+
 # Create Public Route Tables
 resource "aws_route_table" "rt_public" {
   vpc_id = "${data.aws_vpc.vpc_client.id}" 
@@ -15,7 +20,7 @@ resource "aws_route_table" "rt_public" {
     gateway_id = "${data.aws_internet_gateway.igw.id}"
   }
   tags {
-      Name = "rt_pub_${var.customer}"
+      Name = "rt_pub_${var.customer}_${var.customer_cidr_block}"
   }
 }
 
@@ -24,8 +29,13 @@ resource "aws_route_table" "rt_public" {
 resource "aws_route_table" "rt_private" {
   vpc_id = "${data.aws_vpc.vpc_client.id}"
 
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = "${data.aws_nat_gateway.nat_gw.id}"
+  }
+
   tags {
-      Name = "rt_pri_${var.customer}"
+      Name = "rt_pvt_${var.customer}_${var.customer_cidr_block}"
   }
 }
 
