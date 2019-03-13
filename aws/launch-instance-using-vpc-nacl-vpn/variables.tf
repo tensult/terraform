@@ -18,7 +18,7 @@ variable "sub_private_1a" {
 }
 
 variable "sub_private_1b" {
-  description = "Subnet Range"
+  description = "Define Subnet Range"
 }
 
 variable "sub_public_1a" {
