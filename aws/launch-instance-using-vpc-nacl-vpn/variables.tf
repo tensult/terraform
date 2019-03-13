@@ -14,7 +14,7 @@ variable "vpc_id" {
 }
 
 variable "sub_private_1a" {
-  description = "Subnet Range"
+  description = "Define Subnet Range"
 }
 
 variable "sub_private_1b" {
