@@ -36,7 +36,7 @@ variable "freeablememory" {
 }
 
 variable "load_balancer" {
-  description = "ARN of the Load Balancer"
+  description = "Define ARN of the Load Balancer"
 }
 
 variable "lb_name" {
