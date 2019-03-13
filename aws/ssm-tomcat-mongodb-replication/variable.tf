@@ -13,11 +13,11 @@ variable "customer" {
 }
 
 variable "tomcat_file" {
-  description = "Tomcat Text file in s3"
+  description = "Tomcat Text file in s3 path"
 }
 
 variable "mongo_file" {
-  description = "MongoDB Text file in S3"
+  description = "MongoDB Text file in S3 path"
 }
 
 
