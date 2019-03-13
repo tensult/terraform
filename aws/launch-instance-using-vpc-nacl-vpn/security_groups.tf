@@ -11,24 +11,24 @@ resource "aws_security_group" "sg_alb" {
   description = "Security Group for ${var.customer} Application Load Balancer"
   vpc_id      = "${data.aws_vpc.vpc_client.id}"
   
-  # ingress {
-  #   from_port   = 8080
-  #   to_port     = 8080
-  #   protocol    = "tcp"
-  #   security_groups = ["0.0.0.0/0"]
-  # }
-  # ingress {
-  #   from_port   = 80
-  #   to_port     = 80
-  #   protocol    = "tcp"
-  #   security_groups = ["0.0.0.0/0"]
-  # }
-  # ingress {
-  #   from_port   = 443
-  #   to_port     = 443
-  #   protocol    = "tcp"
-  #   security_groups = ["0.0.0.0/0"]
-  # }
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    security_groups = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    security_groups = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
@@ -116,16 +116,16 @@ resource "aws_security_group" "sg_rds" {
   vpc_id      = "${data.aws_vpc.vpc_client.id}"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
     security_groups = ["${aws_security_group.sg_mongodb.id}"]
   }
 
     ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
     security_groups = ["${aws_security_group.sg_appserver.id}"]
   }
 
