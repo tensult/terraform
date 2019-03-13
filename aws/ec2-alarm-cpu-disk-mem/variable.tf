@@ -28,11 +28,11 @@ variable "rds_instance" {
 }
 
 variable "freestoragespace" {
-  description = "Threshold value of Free Storage Space"
+  description = "Define Threshold value of Free Storage Space"
 }
 
 variable "freeablememory" {
-  description = "Threshold value of Freeable­ Memory"
+  description = "Define Threshold value of Freeable­ Memory"
 }
 
 variable "load_balancer" {
