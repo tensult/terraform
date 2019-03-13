@@ -4,6 +4,7 @@ data "template_file" "mongodb_replication_primary" {
   vars {
     customer = "${var.customer}"
     region = "${var.region}"
+    mongo_file = "${var.mongo_file}"
   }
 }
 
@@ -20,6 +21,7 @@ data "template_file" "mongodb_replication_secondary" {
   vars {
     customer = "${var.customer}"
     region = "${var.region}"
+    mongo_file = "${var.mongo_file}"
   }
 }
 

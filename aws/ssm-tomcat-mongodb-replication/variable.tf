@@ -5,9 +5,19 @@ variable "profile" {
 
 variable "region" {
   description = "AWS Region"
-  default = "us-east-1"
+  default = "ap-south-1"
 }
 
 variable "customer" {
   description = "Name of the customer"
 }
+
+variable "tomcat_file" {
+  description = "Tomcat Text file in s3"
+}
+
+variable "mongo_file" {
+  description = "MongoDB Text file in S3"
+}
+
+

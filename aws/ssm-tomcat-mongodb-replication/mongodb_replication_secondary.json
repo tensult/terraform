@@ -96,7 +96,7 @@
                         "firewall-cmd --reload\n",
                         "cd ~\n",
                         "yum install wget vim -y\n",
-                        "wget https://s3.ap-south-1.amazonaws.com/app-server-ilantus/mongo.repo.txt\n",
+                        "wget ${mongo_file}\n",
                         "cp mongo.repo.txt /etc/yum.repos.d/mongodb-org.repo\n",
                         "yum repolist\n",
                         "yum install mongodb-org -y\n",

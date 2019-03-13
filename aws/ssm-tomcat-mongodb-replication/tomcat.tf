@@ -26,7 +26,7 @@ resource "aws_ssm_document" "tomcat" {
                    "chmod -R g+r conf\n",
                    "chmod g+x conf\n",
                    "chown -R tomcat webapps/ work/ temp/ logs/\n",
-                   "wget https://s3.ap-south-1.amazonaws.com/app-server-ilantus/tomcat.service.txt\n",
+                   "wget ${var.tomcat_file}\n",
                    "cp tomcat.service.txt /etc/systemd/system/tomcat.service\n",
                    "systemctl daemon-reload\n",
                    "systemctl start tomcat\n",
