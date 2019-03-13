@@ -1,0 +1,130 @@
+{
+    "description": "Launch Automation Install MongoDB with Replication",
+    "schemaVersion": "0.3",
+    "parameters": {
+        "instanceIds": {
+            "type": "StringList",
+            "description": "InstanceIds to run launch setup"
+        }
+    },
+    "mainSteps": [{
+            "name": "waitForInstancesToStart",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "installdependencies"
+        },
+        {
+            "name": "installdependencies",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "sudo su -\n",
+                        "cd ~\n",
+                        "yum install wget vim -y\n",
+                        "curl -O https://bootstrap.pypa.io/get-pip.py\n",
+                        "python get-pip.py\n",
+                        "pip install awscli\n",
+                        "yum -y install firewalld\n",
+                        "sed -i -e 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux\n"
+                    ]
+                }
+            },
+            "nextStep": "changeHostname"
+        },
+        {
+            "name": "changeHostname",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "sudo su -",
+                        "echo mongodb-primary > /etc/hostname\n",
+                        "instanceId=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
+                        "ipmongoprimary=$(aws ec2 describe-instances --instance-id $instanceId --region ${region} --query 'Reservations[0].Instances[0].Tags[?Key==`ipmongoprimary`].Value' --output text)\n",
+                        "ipmongosecondary=$(aws ec2 describe-instances --instance-id $instanceId --region ${region} --query 'Reservations[0].Instances[0].Tags[?Key==`ipmongosecondary`].Value' --output text)\n",
+                        "echo $ipmongoprimary mongodb-primary >> /etc/hosts\n",
+                        "echo $ipmongosecondary mongodb-secondary >> /etc/hosts\n",
+                        "reboot"
+                    ]
+                }
+            },
+            "nextStep": "waitForInstancesToStartAfterReboot"
+        },
+        {
+            "name": "waitForInstancesToStartAfterReboot",
+            "action": "aws:changeInstanceState",
+            "timeoutSeconds": 600,
+            "onFailure": "Abort",
+            "inputs": {
+                "InstanceIds": [
+                    "{{instanceIds}}"
+                ],
+                "CheckStateOnly": true,
+                "DesiredState": "running"
+            },
+            "nextStep": "installmongoDB"
+        },
+        {
+            "name": "installmongoDB",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "sudo su -\n",
+                        "systemctl start firewalld\n",
+                        "systemctl enable firewalld\n",
+                        "firewall-cmd --permanent --add-port=22/tcp\n",
+                        "firewall-cmd --permanent --add-port=27017/tcp\n",
+                        "firewall-cmd --reload\n",
+                        "cd ~\n",
+                        "yum install wget vim -y\n",
+                        "wget ${mongo_file}\n",
+                        "cp mongo.repo.txt /etc/yum.repos.d/mongodb-org.repo\n",
+                        "yum repolist\n",
+                        "yum install mongodb-org -y\n",
+                        "systemctl start mongod\n",
+                        "sed -i -e 's/  bindIp: 127.0.0.1/#  bindIp: 127.0.0.1/g' /etc/mongod.conf\n",
+                        "echo 'replication:'  >> /etc/mongod.conf\n",
+                        "echo '  replSetName: \"${customer}\"'  >> /etc/mongod.conf\n",
+                        "systemctl restart mongod\n"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "configuremongodb",
+            "action": "aws:runCommand",
+            "onFailure": "Continue",
+            "inputs": {
+                "DocumentName": "AWS-RunShellScript",
+                "InstanceIds": ["{{instanceIds}}"],
+                "Parameters": {
+                    "commands": [
+                        "mongo",
+                        "mongo -eval \"rs.initiate()\"\n",
+                        "mongo -eval \"rs.add(\"mongodb-secondary\")\"\n",
+                        "exit\n"
+                    ]
+                }
+            }
+        }
+    ]
+}
