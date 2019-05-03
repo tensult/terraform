@@ -49,6 +49,7 @@ EOF
 
 #Attach policy
 resource "aws_iam_role_policy_attachment" "permission" {
+  count      = "${var.role_policy_arn != "" ? 1 : 0}"
   role       = "${aws_iam_role.cross_account.name}"
   policy_arn = "${var.role_policy_arn}"
 }
