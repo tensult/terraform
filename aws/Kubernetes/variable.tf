@@ -34,30 +34,4 @@ variable "server-name" {
 variable "vpc_name" {
   description = "VPC name"
 }
-
-variable "master_subnet_cidr" {
-  default = []
-  description = "Master Node Cidr Range"
-}
-
-variable "worker_subnet_cidr" {
-  default = []
-  description = "Worker node cidr range"
-}
-
-variable "public_subnet_cidr" {
-  default = []
-  description = "Public Subnet cidr range"
-}
-
-variable "private_subnet_cidr" {
-  default = []
-  description = "Private Subnet CIDR range"
-}
-variable "cidr" {
-  default = ""
-  description = "VPC Cidr Range"
-}
-
-
-
+  
