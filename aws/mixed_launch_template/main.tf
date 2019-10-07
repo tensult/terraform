@@ -9,6 +9,7 @@ resource "aws_launch_template" "example_temp" {
   instance_type = "t2.micro"
 }
 
+
 data "aws_availability_zones" "available" {}
 resource "aws_autoscaling_group" "example_autoscalling_group" {
   availability_zones = ["${data.aws_availability_zones.available.names}"]
