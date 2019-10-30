@@ -1,0 +1,1 @@
+This Terraform script is to create ELB and attach SSL certficate with this
