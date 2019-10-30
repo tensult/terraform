@@ -9,7 +9,7 @@ profile = Enter your profile name</br>
 region = Enter region where you want to apply it</br>
 env = Enter Enviourment Name, it show in the ALB tags</br> 
 vpc_id = Enter Vpc Id to select vpc</br>
-subnet_id = Enter Subnets Id eg: subnet-00ca3d68 or 172.31.16.0/20</br>
+subnet_id = Enter Subnets Id eg: subnet-00ca3d68</br>
 cer_arn = Enter your certificate arn</br>
 
 ### Step 2: terraform plan
