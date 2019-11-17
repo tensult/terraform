@@ -15,3 +15,8 @@ variable "role_policy_arn" {
   description = "Policy ARN for assume role"
   default     = "arn:aws:iam::aws:policy/PowerUserAccess"
 }
+
+variable "role_session_duration" {
+  description = "Role Session duration"
+  default     = 43200
+}
