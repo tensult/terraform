@@ -1,5 +1,5 @@
 # Setup Kuberntes using terraform script
-### Prerequisties
+### Prerequisite
 #### terraform version 0.11.14
 Download terraform using this link 
 https://releases.hashicorp.com/terraform/
