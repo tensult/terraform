@@ -6,42 +6,13 @@ provider "aws" {
 resource "aws_iam_role" "lambda_role" {
   name = "EC2-Auto-Stop-Lambda"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+  assume_role_policy = "${file("role_policy.json")}"
 }
 
 resource "aws_iam_policy" "lambda_policy" {
   name = "EC2-Auto-Stop"
 
-  policy = <<EOF
-{
-   "Version": "2012-10-17",
-   "Statement": [
-       {
-           "Effect": "Allow",
-           "Action": [
-               "ec2:DescribeInstances",
-               "ec2:DescribeRegions",
-               "ec2:StopInstances"
-           ],
-           "Resource": "*"
-       }
-   ]
-}
-EOF
+  policy = "${file("iam_policy.json")}"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_policy_attachment" {
